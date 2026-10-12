@@ -4936,12 +4936,32 @@ function exoLabel(ex, i){
 }
 
 /* ---- Lexique (recherche) ---- */
+function lexNorm(x){
+  return String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
+    .replace(/\([^)]*\)/g,' ').replace(/[^a-z0-9]+/g,' ').trim();
+}
+/* Regroupe les entrées du lexique par terme (même mot dans plusieurs chapitres) et fusionne les définitions identiques ou incluses */
+function groupLexique(list){
+  const map = new Map();
+  list.forEach(l => {
+    const key = lexNorm(l.term) || String(l.term);
+    let g = map.get(key);
+    if(!g){ g = {term: l.term, defs: [], chaps: []}; map.set(key, g); }
+    if(l.chap && g.chaps.indexOf(l.chap) < 0) g.chaps.push(l.chap);
+    const dn = lexNorm(l.def);
+    if(!dn) return;
+    const i = g.defs.findIndex(d => d.n === dn || d.n.includes(dn) || dn.includes(d.n));
+    if(i < 0) g.defs.push({n: dn, def: l.def});
+    else if(dn.length > g.defs[i].n.length) g.defs[i] = {n: dn, def: l.def};
+  });
+  return [...map.values()];
+}
 function renderLexique(filter){
   const data = MATIERE_DATA[currentMatiereId];
   const f = filter.trim().toLowerCase();
-  const items = data.lexiqueAll.filter(l => !f || l.term.toLowerCase().includes(f) || l.def.toLowerCase().includes(f));
-  document.getElementById('lexList').innerHTML = `<div class="panel">` + (items.length ? items.map(l => `
-    <details class="acc lex-item"><summary><span class="term acc-t">${l.term}</span><span class="chap-tag">${l.chap}</span></summary><div class="acc-b">${l.def}</div></details>`).join('') : `<p>${t('lexique_no_match')}</p>`) + `</div>`;
+  const items = groupLexique(data.lexiqueAll).filter(g => !f || g.term.toLowerCase().includes(f) || g.defs.some(d => d.def.toLowerCase().includes(f)));
+  document.getElementById('lexList').innerHTML = `<div class="panel">` + (items.length ? items.map(g => `
+    <details class="acc lex-item"><summary><span class="term acc-t">${g.term}</span>${g.chaps.map(c => `<span class="chap-tag">${c}</span>`).join('')}</summary><div class="acc-b">${g.defs.map(d => `<p style="margin:0 0 8px;">${d.def}</p>`).join('')}</div></details>`).join('') : `<p>${t('lexique_no_match')}</p>`) + `</div>`;
 }
 function filterLexique(v){ renderLexique(v); }
 
@@ -5025,7 +5045,9 @@ function gradeQuiz(questions, target, chapterId){
 function shuffleArr(a){ return a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]); }
 
 function renderMatchGame(lexique, containerId){
-  const pairs = lexique.map((l,i)=>({idx:i, term:l.term, def:l.def}));
+  const seenT = new Set(), seenD = new Set();
+  const uniq = (lexique || []).filter(l => { const kt = lexNorm(l.term), kd = lexNorm(l.def); if(seenT.has(kt) || seenD.has(kd)) return false; seenT.add(kt); seenD.add(kd); return true; });
+  const pairs = uniq.map((l,i)=>({idx:i, term:l.term, def:l.def}));
   const left = shuffleArr(pairs.map(p=>({idx:p.idx, text:p.term})));
   const right = shuffleArr(pairs.map(p=>({idx:p.idx, text:p.def})));
   let selectedLeft = null;

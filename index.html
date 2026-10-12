@@ -386,12 +386,18 @@
   .ed-hint{ font-size:.82rem; color:#4b5563; margin:4px 0 8px; }
   @media(max-width:640px){ .dep-grid{ grid-template-columns:1fr; } .ed-ill{ grid-template-columns:72px 1fr; } .ed-ill img{ width:72px; height:56px; } }
   .prof-module-row{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
     padding:10px 0; border-bottom:1px solid rgba(0,0,0,.08);
+  }
+  .prof-module-actions{ display:flex; gap:6px; flex-wrap:wrap; }
+  @media(max-width:640px){
+    .prof-module-info{ flex:1 1 100%; }
+    .prof-module-actions{ flex:1 1 100%; }
+    .prof-module-info .prof-status{ white-space:normal; line-height:1.3; }
   }
   body.theme-light .prof-module-row{ border-bottom-color:rgba(0,0,0,.08); }
   .prof-module-row:last-child{ border-bottom:none; }
-  .prof-module-info{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+  .prof-module-info{ display:flex; flex-direction:column; gap:3px; min-width:0; flex:1 1 240px; }
   .prof-module-info strong{ font-size:.92rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .prof-module-code{
     font-family:monospace; font-size:.82rem; font-weight:700; letter-spacing:.04em;
@@ -436,7 +442,15 @@
   .lex-item .term{font-weight:700; color:var(--bark-600); font-family:'Fraunces';}
   details.exo{border:1px solid #e7e9f5; border-radius:var(--radius-card); padding:12px 16px; margin-bottom:10px; background:var(--sand-50); color:var(--ink);}
   details.exo summary{cursor:pointer; font-weight:600;}
-  details.exo .corr{margin-top:10px; padding-top:10px; border-top:1px dashed #dcdfeb; color:#6b7280;}
+  details.acc{border-bottom:1px solid #e7e9f5; padding:10px 0;}
+  details.acc>summary,details.exo>summary{cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-weight:600;}
+  details.acc>summary::-webkit-details-marker,details.exo>summary::-webkit-details-marker{display:none;}
+  details.acc>summary::before,details.exo>summary::before{content:'▸'; color:var(--bark-600); transition:transform .15s; flex:none;}
+  details.acc[open]>summary::before,details.exo[open]>summary::before{transform:rotate(90deg);}
+  details.acc .acc-t,details.exo .acc-t{flex:1 1 140px; min-width:0; overflow-wrap:anywhere;}
+  details.acc .acc-b{margin-top:8px; padding-left:18px; color:var(--ink);}
+  details.exo .exo-enonce{margin-top:10px; padding-left:18px;}
+  details.exo .corr{margin-top:10px; margin-left:18px; padding-top:10px; border-top:1px dashed #dcdfeb; color:#6b7280;}
   .chap-tag{display:inline-block; font-size:.72rem; background:var(--m-color); color:#fff; padding:1px 8px; border-radius:10px; margin-bottom:6px;}
 
   /* illustrations */
@@ -3177,7 +3191,7 @@ function renderProfModulesList(modules){
         ${m.code ? `<span class="prof-module-code" onclick="copyProfCode('${m.code}')" title="${t('prof_copy_code')}">${m.code} 📋</span>` : `<span class="prof-status prof-status-pending">${t('ed_draft_tag')}</span>`}<br>
         ${profModuleStatusBadge(m._content)}${profUpdateBadge(m._content)}
       </div>
-      <div style="display:flex; gap:6px; flex-shrink:0; flex-wrap:wrap;">
+      <div class="prof-module-actions">
         ${m._content && m._content.status === 'ready' && !m.code ? `<button class="btn" style="padding:6px 10px; font-size:.78rem;" onclick="openProfEditor('${m.id}')">${t('ed_btn')}</button>` : ''}
         ${m._content && m._content.status === 'ready' && m.code ? `<button class="btn ghost" style="padding:6px 10px; font-size:.78rem;" onclick="openProfModuleManage('${m.id}')">${t('prof_manage_chapters_btn')}</button>` : ''}
         ${m._content && m._content.status === 'ready' && m.code && (m._content.update_status !== 'generating' || (Date.now() - new Date(m._content.updated_at).getTime() > 600000)) ? `<button class="btn" style="padding:6px 10px; font-size:.78rem;" onclick="profStartUpdate('${m.id}', this.closest('.prof-module-row').getAttribute('data-module-title'))">🔄 ${t('upd_btn')}</button>` : ''}
@@ -4816,14 +4830,14 @@ function openModule(id){
   if(id === 'exemples'){
     header.innerHTML = `<h2>${t('exemples_title', {mat: mat.name})}</h2>`;
     body.innerHTML = data.exemples.length ? (`<div class="panel">` + data.exemples.map(e => `
-      <div style="margin-bottom:16px;"><span class="chap-tag">${e.chap}</span><h4 style="margin:4px 0;">${e.titre}</h4><p>${e.texte}</p></div>`).join('') + `</div>`)
+      <details class="acc"><summary><span class="acc-t">${e.titre}</span><span class="chap-tag">${e.chap}</span></summary><div class="acc-b"><p>${e.texte}</p></div></details>`).join('') + `</div>`)
       : `<div class="panel"><p>${t('exemples_empty')}</p></div>`;
     return;
   }
   if(id === 'exercices'){
     header.innerHTML = `<h2>${t('exercices_title', {mat: mat.name})}</h2>`;
     body.innerHTML = data.exercices.length
-      ? data.exercices.map(ex => `<details class="exo"><summary><span class="chap-tag">${ex.chap}</span><br>${ex.enonce}</summary><div class="corr">${ex.correction}</div></details>`).join('')
+      ? data.exercices.map((ex, i) => `<details class="exo"><summary><span class="acc-t">${exoLabel(ex, i)}</span><span class="chap-tag">${ex.chap}</span></summary><div class="exo-enonce">${ex.enonce}</div><div class="corr">${ex.correction}</div></details>`).join('')
       : `<div class="panel"><p>${t('exercices_empty')}</p></div>`;
     return;
   }
@@ -4912,13 +4926,22 @@ function openModule(id){
   }
 }
 
+/* ---- Libellé court d'un exercice (mots-clés) ---- */
+function exoLabel(ex, i){
+  const raw = String(ex.enonce || '').replace(/\s+/g, ' ').trim();
+  const words = raw.split(' ');
+  let short = words.slice(0, 6).join(' ');
+  if(words.length > 6 || short.length > 48) short = short.slice(0, 48).replace(/[\s,;:.]+\S*$/, '') + '…';
+  return `${i + 1}. ${short}`;
+}
+
 /* ---- Lexique (recherche) ---- */
 function renderLexique(filter){
   const data = MATIERE_DATA[currentMatiereId];
   const f = filter.trim().toLowerCase();
   const items = data.lexiqueAll.filter(l => !f || l.term.toLowerCase().includes(f) || l.def.toLowerCase().includes(f));
   document.getElementById('lexList').innerHTML = `<div class="panel">` + (items.length ? items.map(l => `
-    <div class="lex-item"><span class="chap-tag">${l.chap}</span><br><span class="term">${l.term}</span> — ${l.def}</div>`).join('') : `<p>${t('lexique_no_match')}</p>`) + `</div>`;
+    <details class="acc lex-item"><summary><span class="term acc-t">${l.term}</span><span class="chap-tag">${l.chap}</span></summary><div class="acc-b">${l.def}</div></details>`).join('') : `<p>${t('lexique_no_match')}</p>`) + `</div>`;
 }
 function filterLexique(v){ renderLexique(v); }
 

@@ -688,7 +688,7 @@
   .landing-tagline{font-size:.95rem; color:rgba(251,251,251,.7); margin-top:-10px;}
   .landing-actions{width:100%; display:flex; flex-direction:column; gap:10px; margin-top:6px;}
 
-  /* ---- Accès élève par code + gestion des classes (professeur) ---- */
+  /* ---- Accès étudiant par code + gestion des classes (professeur) ---- */
   body.seat-user .hero-grid .hero-card{ grid-column:1 / -1; }
   body.seat-user .seat-hide{ display:none !important; }
   .landing-code-row.student{ padding:8px 8px 8px 16px; border-color:rgba(110,110,249,.55); background:rgba(110,110,249,.10); }
@@ -717,6 +717,25 @@
   .cls-new-row{ background:#f4f4ff; }
   .btn.cls-ghost{ background:#fff; color:#1f2430; border:1px solid #c9cce0; }
   .btn.cls-ghost:hover{ background:#f1f1fb; filter:none; }
+  .panel .btn.ghost, #viewBody .btn.ghost{ background:#fff; color:#1f2430; border:1px solid #c9cce0; }
+  .panel .btn.ghost:hover, #viewBody .btn.ghost:hover{ background:#f1f1fb; filter:none; }
+  .cls-reset{ background:none; border:none; cursor:pointer; color:#6b7280; font-size:.9rem; padding:0 4px; }
+  .cls-reset:hover{ color:#1f2430; }
+  .acc-or{ margin:16px 0 8px; font-size:.78rem; color:#6b7280; text-align:center; }
+  .acc-staff{ display:flex; gap:8px; }
+  .acc-staff .btn{ flex:1; }
+  .study-bar{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+  .study-msgs{ height:min(55vh,460px); overflow-y:auto; border:1px solid #e7e9f5; border-radius:12px; padding:12px; background:#fff; display:flex; flex-direction:column; gap:8px; }
+  .study-msg{ max-width:85%; align-self:flex-start; background:#f1f1fb; border-radius:12px; padding:8px 12px; }
+  .study-msg.mine{ align-self:flex-end; background:#e4e5ff; }
+  .study-meta{ font-size:.72rem; color:#6b7280; }
+  .study-body{ font-size:.92rem; color:#1f2430; white-space:pre-wrap; word-break:break-word; }
+  .study-act{ background:none; border:none; cursor:pointer; font-size:.78rem; padding:0 3px; color:#6b7280; }
+  .study-act:hover{ color:#1f2430; }
+  .study-send{ display:flex; gap:8px; margin-top:10px; }
+  .study-send .ed-in{ flex:1; }
+  .study-chip{ display:inline-block; background:#f1f1fb; color:#1f2430; border-radius:999px; padding:3px 10px; margin:0 6px 6px 0; font-size:.8rem; }
+  #studyMembers{ margin-bottom:10px; }
   .landing-btn-row{display:flex; gap:8px;}
   .landing-btn{padding:14px 20px; border-radius:12px; font-weight:700; font-size:.95rem; cursor:pointer; border:none; font-family:inherit;}
   .landing-btn.primary{flex:1.3; background:var(--vyse-blue); color:#fff; transition:filter .15s ease, transform .15s ease;}
@@ -775,13 +794,14 @@
 
     <div class="landing-actions">
       <div class="landing-code-row student">
-        <input type="text" id="landingStudentCode" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" data-i18n-ph="stu_code_ph" placeholder="Mon code élève" onkeydown="if(event.key==='Enter'){event.preventDefault();submitStudentCode();}">
+        <input type="text" id="landingStudentCode" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" data-i18n-ph="stu_code_ph" placeholder="Mon code étudiant" onkeydown="if(event.key==='Enter'){event.preventDefault();submitStudentCode();}">
         <button id="landingStudentBtn" onclick="submitStudentCode()" data-i18n="stu_enter">Entrer</button>
       </div>
       <div class="landing-code-msg" id="landingCodeMsg"></div>
       <div class="landing-help" data-i18n="stu_help">Ton code t'a été donné par ton professeur. Pas besoin d'e-mail ni de mot de passe.</div>
       <div class="landing-btn-row">
-        <button class="landing-btn secondary" onclick="openProfModal()" data-i18n="landing_prof_btn">Professeur</button>
+        <button class="landing-btn secondary" onclick="openProfModal('prof')" data-i18n="landing_prof_btn">Professeur</button>
+        <button class="landing-btn secondary" onclick="openProfModal('etab')" data-i18n="landing_etab_btn">Établissement</button>
       </div>
     </div>
 
@@ -803,8 +823,9 @@
   <nav class="sidebar-nav">
     <button class="side-link active" data-nav="home" onclick="navGo('home')"><span class="side-ico">🏠</span><span data-i18n="nav_home">Accueil</span></button>
     <button class="side-link" data-nav="dashboard" onclick="navGo('dashboard')"><span class="side-ico">📊</span><span data-i18n="dashboard_title">Tableau de bord</span></button>
-    <button class="side-link seat-hide" data-nav="groups" onclick="navGo('groups')"><span class="side-ico">🎓</span><span data-i18n="admin_title">Mes groupes</span></button>
+    <button class="side-link" data-nav="groups" onclick="navGo('groups')"><span class="side-ico">🎓</span><span data-i18n="admin_title">Mes groupes</span></button>
     <button class="side-link" data-nav="prof" onclick="navGo('prof')" style="display:none;"><span class="side-ico">🧑‍🏫</span><span data-i18n="prof_page_nav">Page professeur</span></button>
+    <button class="side-link" data-nav="admin" onclick="navGo('admin')" style="display:none;"><span class="side-ico">🛠️</span><span data-i18n="adm_title">Administration</span></button>
     <button class="side-link" data-nav="settings" onclick="navGo('settings')"><span class="side-ico">⚙</span><span data-i18n="settings_title">Réglages</span></button>
   </nav>
   <div class="sidebar-profile" onclick="openAccount()" id="sidebarProfile">
@@ -843,7 +864,7 @@
         <p data-i18n="dashboard_subtitle">Ta progression, toutes matières confondues</p>
         <span class="hero-arrow">→</span>
       </div>
-      <div class="stat-card seat-hide" onclick="openAdminPage()">
+      <div class="stat-card" onclick="openAdminPage()">
         <span class="stat-ico">🎓</span>
         <h4 data-i18n="admin_title">Mes groupes</h4>
         <p data-i18n="groups_home_desc">Crée ou rejoins un groupe de révision.</p>
@@ -893,8 +914,9 @@
 <nav class="bottom-nav" id="bottomNav">
   <button class="bn-link active" data-nav="home" onclick="navGo('home')"><span>🏠</span><small data-i18n="nav_home">Accueil</small></button>
   <button class="bn-link" data-nav="dashboard" onclick="navGo('dashboard')"><span>📊</span><small data-i18n="dashboard_title">Tableau de bord</small></button>
-  <button class="bn-link seat-hide" data-nav="groups" onclick="navGo('groups')"><span>🎓</span><small data-i18n="admin_title">Groupes</small></button>
+  <button class="bn-link" data-nav="groups" onclick="navGo('groups')"><span>🎓</span><small data-i18n="admin_title">Groupes</small></button>
   <button class="bn-link" data-nav="prof" onclick="navGo('prof')" style="display:none;"><span>🧑‍🏫</span><small data-i18n="prof_page_nav_short">Prof</small></button>
+  <button class="bn-link" data-nav="admin" onclick="navGo('admin')" style="display:none;"><span>🧑‍🏫</span><small data-i18n="adm_short">Admin</small></button>
   <button class="bn-link" data-nav="settings" onclick="navGo('settings')"><span>⚙</span><small data-i18n="settings_title">Réglages</small></button>
 </nav>
 
@@ -931,25 +953,25 @@
       <p>Thomas LEVEQUE, éditeur de Vyse AI, est responsable du traitement des données personnelles collectées sur le site. Pour toute question ou demande, écris à <a href="mailto:contact.vyseai@gmail.com">contact.vyseai@gmail.com</a>.</p>
 
       <h4>Qui utilise Vyse AI, et comment</h4>
-      <p>Dans Vyse AI, l'établissement (ou l'organisme de formation) crée des groupes d'élèves — classe, promotion, licence… — et génère pour chaque élève un code d'accès individuel : <strong>les élèves n'ont pas de compte personnel</strong> et n'indiquent ni adresse e-mail ni mot de passe, ils entrent simplement leur code. L'établissement choisit le nom ou pseudonyme associé à chaque code (un prénom ou un pseudonyme suffit, nous déconseillons le nom complet) et reste seul à connaître cette correspondance. Les professeurs déposent des cours et inscrivent à chacun d'eux les groupes autorisés, au moyen du code du groupe ; un élève ne peut rejoindre un cours, avec le code de ce cours, que si son groupe y est inscrit. L'établissement décide de l'usage de l'outil avec ses élèves et en informe les élèves et leurs représentants légaux ; Vyse AI traite les données des élèves pour son compte, selon ses instructions.</p>
+      <p>Vyse AI s'adresse aux établissements d'enseignement supérieur et organismes de formation. L'établissement crée des groupes d'étudiants — promotion, licence, TD, langues… — et génère pour chaque personne un code d'accès individuel. Lors de sa première connexion, l'étudiant saisit ce code, indique son prénom et son nom, puis choisit un mot de passe (conservé sous forme chiffrée, jamais lisible par nous ni par l'établissement) : <strong>aucune adresse e-mail n'est demandée</strong>. Son prénom et son nom sont visibles de l'établissement et des enseignants qui l'ont inscrit à un cours. Les enseignants déposent des cours et y inscrivent des groupes entiers (code du groupe) ou des étudiants un par un (code individuel) ; un étudiant ne peut rejoindre un cours, avec le code de ce cours, que s'il y est inscrit. L'établissement décide de l'usage de l'outil auprès de ses étudiants et les en informe ; pour les données des étudiants, Vyse AI agit en tant que sous-traitant, selon les instructions de l'établissement.</p>
 
-      <h4>Mineurs</h4>
-      <p>Aucune création de compte n'est demandée aux élèves, mineurs compris : l'accès repose sur un code remis par l'établissement. Il appartient à l'établissement de respecter les règles applicables à l'information des élèves et de leurs représentants légaux, ainsi que celles relatives aux outils numériques utilisés en classe.</p>
+      <h4>Information des étudiants</h4>
+      <p>L'accès repose sur un code remis par l'établissement : les étudiants n'ont aucun compte personnel à créer ni adresse e-mail à fournir. Il appartient à l'établissement d'informer ses étudiants de l'utilisation de l'outil et de leurs droits, conformément à ses propres obligations en tant que responsable de traitement.</p>
 
       <h4>Données collectées et finalités</h4>
-      <p>Place élève : nom ou pseudonyme saisi par l'établissement, code d'accès, date de dernière connexion. Compte professeur : email, mot de passe (chiffré), prénom, nom, nom du cours, code d'activation. Usage de la plateforme : chapitres validés, tentatives de QCM (score, date), temps passé par chapitre, questions posées à l'assistant de cours, modules de cours créés et codes associés, appartenance à un groupe d'élèves et inscriptions aux cours. Ces données servent uniquement à faire fonctionner le service (accès, suivi de progression, tableaux de bord pour l'établissement) — jamais à des fins publicitaires, et elles ne sont jamais revendues.</p>
+      <p>Place étudiant : prénom et nom saisis par l'étudiant, code d'accès, mot de passe (chiffré), date de dernière connexion. Compte professeur : email, mot de passe (chiffré), prénom, nom, nom du cours, code d'activation. Usage de la plateforme : chapitres validés, tentatives de QCM (score, date), temps passé par chapitre, questions posées à l'assistant de cours, modules de cours créés et codes associés, appartenance à un groupe d'étudiants et inscriptions aux cours, groupes de révision créés par les étudiants (nom du groupe, prénom, messages écrits, effacés au bout de 30 jours ; l'établissement peut désactiver cette fonction et n'a pas accès aux messages). Ces données servent uniquement à faire fonctionner le service (accès, suivi de progression, tableaux de bord pour l'établissement) — jamais à des fins publicitaires, et elles ne sont jamais revendues.</p>
 
       <h4>Base légale</h4>
-      <p>Le consentement (acceptation lors de l'inscription) pour la création de compte et le traitement de la progression ; l'intérêt légitime de l'éditeur pour la sécurité et l'amélioration du service.</p>
+      <p>Pour les données des étudiants, la base légale est déterminée par l'établissement, responsable de traitement (en général sa mission d'enseignement et de formation) ; Vyse AI traite ces données pour son compte. Pour les comptes enseignants et établissements, ainsi que pour la sécurité et l'amélioration du service : l'exécution du service demandé et l'intérêt légitime de l'éditeur.</p>
 
       <h4>Destinataires et sous-traitants</h4>
       <p>Les données de compte, de progression et les cours sont stockés chez Supabase (base de données, région Europe — Paris). Le code du site est hébergé par Vercel (États-Unis), qui peut traiter des données techniques de connexion comme l'adresse IP. Pour générer un cours à partir d'un fichier déposé par un professeur, et pour répondre aux questions posées à l'agent « Poser une question », le texte concerné est envoyé à Anthropic (États-Unis) via son API professionnelle : selon les conditions d'Anthropic, ces contenus ne servent pas à entraîner ses modèles et sont supprimés de ses serveurs sous 30 jours, sauf exceptions (signalement d'abus, obligation légale). Vyse AI ne conserve pas le texte brut des fichiers déposés après la génération. Ne dépose donc pas de données personnelles (noms, coordonnées, informations sensibles) dans les cours ou dans les questions.</p>
 
       <h4>Durée de conservation</h4>
-      <p>Données des élèves : conservées tant que le code (la « place ») existe ; elles sont effacées dès que l'établissement supprime l'élève ou le groupe, et au plus tard à la fin de la relation avec l'établissement. Compte professeur ou établissement : conservé tant que le compte est actif ; en cas de suppression (depuis « Mon compte » ou par simple email à l'adresse de contact), les données sont effacées sous 30 jours, sauf obligation légale contraire.</p>
+      <p>Données des étudiants : conservées tant que le code (la « place ») existe ; elles sont effacées dès que l'établissement supprime l'étudiant ou le groupe, et au plus tard à la fin de la relation avec l'établissement. Compte professeur ou établissement : conservé tant que le compte est actif ; en cas de suppression (depuis « Mon compte » ou par simple email à l'adresse de contact), les données sont effacées sous 30 jours, sauf obligation légale contraire.</p>
 
       <h4>Tes droits</h4>
-      <p>Conformément au RGPD et à la loi Informatique et Libertés, chacun dispose d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de ses données. Les élèves peuvent les exercer auprès de leur établissement, ou en écrivant à <a href="mailto:contact.vyseai@gmail.com">contact.vyseai@gmail.com</a> ; les professeurs et établissements peuvent aussi supprimer directement leur compte depuis « Mon compte ». En cas de désaccord, une réclamation peut être introduite auprès de la CNIL (<a href="https://www.cnil.fr" target="_blank" rel="noopener">www.cnil.fr</a>).</p>
+      <p>Conformément au RGPD et à la loi Informatique et Libertés, chacun dispose d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de ses données. Les étudiants peuvent les exercer auprès de leur établissement, ou en écrivant à <a href="mailto:contact.vyseai@gmail.com">contact.vyseai@gmail.com</a> ; les professeurs et établissements peuvent aussi supprimer directement leur compte depuis « Mon compte ». En cas de désaccord, une réclamation peut être introduite auprès de la CNIL (<a href="https://www.cnil.fr" target="_blank" rel="noopener">www.cnil.fr</a>).</p>
     </div>
 
     <div id="legalPaneCookies" style="display:none;">
@@ -1116,33 +1138,18 @@
     <h3 data-i18n="account_title">Mon compte</h3>
 
     <div id="accountLoggedOut">
-      <div class="seg-toggle" id="authTabs" style="margin-bottom:16px;">
-        <button id="authTabLogin" class="active" onclick="setAuthMode('login')" data-i18n="tab_login">Connexion</button>
-        <button id="authTabSignup" onclick="setAuthMode('signup')" data-i18n="tab_signup">Créer un compte</button>
-      </div>
-
       <div id="authFormNormal">
-        <div id="authSignupExtra" style="display:none;">
-          <input type="text" id="authPrenom" placeholder="Prénom" data-i18n-ph="ph_prenom">
-          <input type="text" id="authNom" placeholder="Nom" data-i18n-ph="ph_nom">
-          <input type="text" id="authGroupCode" placeholder="Code de classe / groupe (optionnel)" data-i18n-ph="ph_group_code">
-          <label class="consent-check">
-            <input type="checkbox" id="authMinorConsent">
-            <span data-i18n="consent_minor_text">J'ai 15 ans ou plus, ou j'ai l'accord d'un parent / responsable légal pour créer ce compte.</span>
-          </label>
-          <label class="consent-check">
-            <input type="checkbox" id="authPrivacyConsent">
-            <span id="authConsentPrivacySpan">J'ai lu et j'accepte les <a href="#" onclick="event.preventDefault(); openLegalModal();">mentions légales et la politique de confidentialité</a>.</span>
-          </label>
+        <p style="font-size:.88rem; margin:0 0 10px;" data-i18n="acc_student_lead">Étudiant : entre le code que ton établissement t'a donné.</p>
+        <div class="landing-code-row student" style="margin:0;">
+          <input type="text" id="accStudentCode" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" data-i18n-ph="stu_code_ph" placeholder="Mon code étudiant" onkeydown="if(event.key==='Enter'){event.preventDefault();submitStudentCode('account');}">
+          <button onclick="submitStudentCode('account')" data-i18n="stu_enter">Entrer</button>
         </div>
-        <input type="text" id="authEmail" placeholder="Adresse email" autocomplete="username" data-i18n-ph="ph_email">
-        <input type="password" id="authPassword" placeholder="Mot de passe (6 caractères min.)" autocomplete="current-password" data-i18n-ph="ph_password">
-        <div style="text-align:right; margin:-4px 0 10px;">
-          <button type="button" id="forgotLink" onclick="setAuthMode('forgot')" style="background:none;border:none;color:var(--bark-600);font-size:.78rem;cursor:pointer;text-decoration:underline;padding:0;" data-i18n="forgot_link">Mot de passe oublié ?</button>
+        <div class="auth-msg" id="accStudentMsg"></div>
+        <div class="acc-or" data-i18n="acc_or_staff">Professeur ou établissement</div>
+        <div class="acc-staff">
+          <button class="btn ghost" onclick="closeAccount(); openProfModal('prof')" data-i18n="acc_staff_prof">Espace professeur</button>
+          <button class="btn ghost" onclick="closeAccount(); openProfModal('etab')" data-i18n="acc_staff_etab">Espace établissement</button>
         </div>
-        <div class="auth-msg" id="authMsg"></div>
-        <button class="btn" id="authSubmitBtn" onclick="submitAuth()" data-i18n="btn_login">Se connecter</button>
-        <p style="font-size:.78rem; color:#6b7280; margin-top:12px;" data-i18n="account_note">Ton compte garde ta progression (chapitres validés, préférences…) même si tu changes d'appareil ou de navigateur.</p>
       </div>
 
       <div id="authFormForgot" style="display:none;">
@@ -1173,7 +1180,7 @@
 <div class="overlay" id="profOverlay">
   <div class="modal-box">
     <button class="close-x" onclick="closeProfModal()">×</button>
-    <h3 data-i18n="prof_modal_title">Espace professeur</h3>
+    <h3 id="profModalTitle" data-i18n="prof_modal_title">Espace professeur</h3>
 
     <div id="profLoggedOut">
       <div class="seg-toggle" id="profAuthTabs" style="margin-bottom:16px;">
@@ -1185,7 +1192,7 @@
         <input type="text" id="profPrenom" placeholder="Prénom" data-i18n-ph="ph_prenom">
         <input type="text" id="profNom" placeholder="Nom" data-i18n-ph="ph_nom">
         <input type="text" id="profCode" placeholder="Code unique professeur" data-i18n-ph="ph_prof_code">
-        <p style="font-size:.76rem; color:#6b7280; margin:-4px 0 10px;" data-i18n="prof_code_help">Le code qui t'a été transmis pour activer ton accès professeur.</p>
+        <p id="profCodeHelp" style="font-size:.76rem; color:#6b7280; margin:-4px 0 10px;" data-i18n="prof_code_help">Le code qui t'a été transmis pour activer ton accès professeur.</p>
         <label class="consent-check">
           <input type="checkbox" id="profPrivacyConsent">
           <span id="profConsentPrivacySpan">J'ai lu et j'accepte les <a href="#" onclick="event.preventDefault(); openLegalModal();">mentions légales et la politique de confidentialité</a>.</span>
@@ -1193,14 +1200,15 @@
       </div>
       <input type="text" id="profEmail" placeholder="Adresse email" autocomplete="username" data-i18n-ph="ph_email">
       <input type="password" id="profPassword" placeholder="Mot de passe (6 caractères min.)" autocomplete="current-password" data-i18n-ph="ph_password">
+      <div style="text-align:right; margin:-4px 0 10px;"><button type="button" id="profForgotLink" onclick="closeProfModal(); openAccount(); setAuthMode('forgot')" style="background:none;border:none;color:var(--bark-600);font-size:.78rem;cursor:pointer;text-decoration:underline;padding:0;" data-i18n="forgot_link">Mot de passe oublié ?</button></div>
       <div class="auth-msg" id="profAuthMsg"></div>
       <button class="btn" id="profAuthSubmitBtn" onclick="submitProfAuth()" data-i18n="btn_login">Se connecter</button>
-      <p style="font-size:.78rem; color:#6b7280; margin-top:12px;" data-i18n="prof_note">Ton espace professeur te permet de déposer tes cours et de générer des codes pour tes élèves.</p>
+      <p id="profNote" style="font-size:.78rem; color:#6b7280; margin-top:12px;" data-i18n="prof_note">Ton espace professeur te permet de déposer tes cours et de générer des codes pour tes étudiants.</p>
     </div>
 
     <div id="profLoggedIn" style="display:none;">
       <p style="font-size:.92rem;" id="profLoggedInText">Connecté en tant que <strong id="profEmailDisplay"></strong>.</p>
-      <button class="btn" onclick="closeProfModal(); navGo('prof');" data-i18n="prof_goto_page">Aller à ma page professeur</button>
+      <button class="btn" id="profGotoBtn" onclick="closeProfModal(); navGo('prof');" data-i18n="prof_goto_page">Aller à ma page professeur</button>
       <button class="btn ghost" style="margin-top:8px;" onclick="logout()" data-i18n="acc_logout">Se déconnecter</button>
     </div>
 
@@ -1241,8 +1249,8 @@ let currentLang = 'fr';
 
 const I18N = {
 fr:{
-stu_code_ph:"Mon code élève", stu_enter:"Entrer", stu_help:"Ton code t'a été donné par ton professeur. Pas besoin d'e-mail ni de mot de passe.", stu_err_invalid:"Code non reconnu. Vérifie-le ou demande-le à ton professeur.", stu_err_rate:"Trop d'essais. Attends quelques minutes puis réessaie.", stu_err_server:"Connexion impossible pour le moment. Réessaie dans un instant.", stu_err_empty:"Saisis ton code élève.", stu_welcome:"Bienvenue !", stu_not_enrolled:"Tu n'es pas inscrit(e) à ce cours. Demande à ton professeur de t'inscrire.", etab_page_t:"Espace établissement", cls_title:"Groupes d'élèves", cls_intro:"Crée un groupe par classe, promotion, TD ou option : chaque élève reçoit un code personnel, sans compte ni e-mail, et peut appartenir à plusieurs groupes (classe, TD, langue…). Le code du groupe est à donner aux professeurs, qui l'utilisent pour inscrire tout le groupe à leur cours. Toi seul connais le nom associé à chaque code (un prénom ou un pseudonyme suffit).", cls_n_codes:"{n} codes", cls_manage:"Gérer", cls_none:"Aucun groupe pour l'instant.", cls_new_t:"Nouveau groupe", cls_name_lab:"Nom du groupe", cls_name_ph:"Ex. Licence 3 AES", cls_count_lab:"Nombre de codes à générer", cls_or:"— ou —", cls_names_lab:"Colle ta liste d'élèves (un nom ou pseudo par ligne)", cls_names_ph:"Léa\nMehdi\nÉlève 3…", cls_create_btn:"Créer le groupe et les codes", cls_err_name:"Donne un nom au groupe.", cls_err_toomany:"Maximum 500 codes à la fois.", cls_err_empty:"Indique un nombre de codes ou une liste de noms.", cls_err_notetab:"Réservé aux comptes établissement.", cls_created:"{n} codes créés (surlignés ci-dessous).", cls_back:"← Retour", cls_manager_t:"Groupe", cls_never:"jamais", cls_rename:"Renommer", cls_delete_class:"Supprimer le groupe", cls_add_lab:"Ajouter des codes", cls_add_btn:"Ajouter", cls_add_names:"Ou ajouter à partir d'une liste de noms", cls_group_code:"Code du groupe (à donner aux professeurs)", cls_group_code_help:"Un professeur saisit ce code dans son espace pour inscrire tous les élèves du groupe à l'un de ses cours.", cls_search:"Rechercher un élève ou un code…", cls_print:"Imprimer les cartes", cls_regen:"Régénérer les codes", cls_delete_sel:"Supprimer l'élève", cls_col_groups:"Autres groupes", cls_pick_group:"Choisis un groupe", cls_add_to_btn:"Ajouter à ce groupe", cls_remove_from:"Retirer de ce groupe", cls_added_to:"{n} élève(s) ajouté(s) à « {name} ».", cls_removed_from:"{n} élève(s) retiré(s) de ce groupe.", cls_remove_confirm:"Retirer {n} élève(s) de ce groupe ? Ils restent dans leurs autres groupes.", cls_col_name:"Élève", cls_col_code:"Code", cls_col_last:"Dernière connexion", cls_col_chap:"Chapitres", cls_col_qcm:"QCM", cls_col_avg:"Moyenne", cls_col_time:"Temps", cls_shared_tip:"Astuce : imprime les cartes et découpe-les. Sur un ordinateur partagé, les élèves doivent se déconnecter en fin de séance.", cls_no_rows:"Aucun élève.", cls_copy:"Cliquer pour copier", cls_n_selected:"{n} sélectionné(s)", cls_select_hint:"Coche des élèves pour agir sur eux, ou agis sur toute la liste (impression, CSV).", cls_copied:"{code} copié.", cls_rename_prompt:"Nouveau nom ou pseudo :", cls_need_selection:"Coche d'abord un ou plusieurs élèves.", cls_regen_confirm:"Régénérer le code de {n} élève(s) ? Les anciens codes ne fonctionneront plus.", cls_regenerated:"{n} nouveaux codes générés (surlignés).", cls_delete_confirm:"Supprimer {n} élève(s) de TOUS leurs groupes ? Leur code et leur progression seront définitivement effacés.", cls_deleted:"{n} élève(s) supprimé(s).", cls_delete_class_confirm:"Supprimer le groupe « {name} » ({n} élèves) ? Les élèves qui n'appartiennent qu'à ce groupe sont supprimés avec leur progression ; ceux qui sont aussi dans d'autres groupes sont conservés.", cls_popup_blocked:"Le navigateur a bloqué la fenêtre d'impression. Autorise les fenêtres pop-up pour ce site.", enr_title:"Inscrire des élèves à un cours", enr_intro:"Seuls les élèves des groupes que tu inscris ici peuvent rejoindre ton cours avec son code. Demande à ton établissement le code du groupe (par exemple celui de ta Licence 3).", enr_course_lab:"Cours", enr_code_ph:"Code du groupe", enr_btn:"Inscrire le groupe", enr_none_modules:"Crée d'abord un cours pour pouvoir y inscrire des élèves.", enr_none:"Aucun groupe inscrit à ce cours pour l'instant.", enr_row:"{n} élèves · {j} ont rejoint le cours", enr_remove:"Retirer", enr_remove_confirm:"Retirer ce groupe ? Ses élèves perdront l'accès à ce cours.", enr_done:"Groupe « {name} » inscrit ({n} élèves).", enr_removed:"Groupe retiré.", enr_err_code:"Code de groupe inconnu.", enr_err_empty:"Saisis le code du groupe.", enr_err_notprof:"Réservé aux comptes professeur.",
-msg_prof_code_invalid:"Code professeur invalide, déjà utilisé ou expiré. Demande un nouveau code.", tts_listen:"Écouter le cours", tts_pause:"Pause", tts_resume:"Reprendre", tts_stop:"Arrêter", tts_speed:"Vitesse", tts_unsupported:"Lecture vocale indisponible sur ce navigateur.", brand_title:"Mon sentier de révision", prof_rename_btn:"Renommer", prof_rename_prompt:"Nouveau nom du module :", prof_status_pending:"En attente", prof_status_generating:"Génération en cours", prof_status_ready:"Prêt", prof_status_error:"Erreur de génération", prof_extract_failed:"Impossible d'extraire le texte de ce fichier.", prof_module_wait_title:"Préparation du contenu…", prof_module_wait_text:"Le cours est en cours de génération automatique à partir du fichier déposé par ton professeur. Cette page se mettra à jour automatiquement.", prof_module_error_title:"Génération impossible", prof_module_error_text:"La génération automatique du contenu de ce module a échoué. Préviens ton professeur.", prof_manage_chapters_btn:"Gérer les chapitres", prof_manage_chapters_title:"Chapitres affichés aux élèves", prof_manage_chapters_text:"Choisis les chapitres que tes élèves peuvent voir. Les exemples et exercices affichés s'adapteront automatiquement aux chapitres cochés.", prof_save_chapters_btn:"Enregistrer", msg_need_one_chapter:"Coche au moins un chapitre.", msg_chapters_saved:"Modifications enregistrées.", dyslexia_title:"Confort de lecture (dyslexie)", dyslexia_text:"Police adaptée, espacement augmenté, texte aligné à gauche et contrastes adoucis, d'après les recommandations pour les lecteurs dyslexiques.", dyslexia_on:"✅ Activé", dyslexia_off:"◻️ Désactivé",ed_sections:"Cours condensé (sections)",ed_sec_title:"Titre de la section",upd_btn:"Mettre à jour le cours",upd_banner_t:"Mise à jour de « {title} »",upd_banner:"Dépose la nouvelle version du cours (et, si tu veux, des notes d'élèves et des illustrations). Le code reste le même. Les élèves gardent l'ancienne version jusqu'à la fin de la génération, puis voient la nouvelle en rechargeant la page. Attention : le nouveau cours remplace entièrement l'ancien (tes modifications manuelles et les illustrations actuelles seront perdues) et tous les chapitres redeviennent visibles.",upd_cancel:"Annuler la mise à jour",upd_start:"Lancer la mise à jour",upd_confirm:"Remplacer le cours publié par cette nouvelle version ? Les élèves la verront en rechargeant la page. Tes modifications manuelles et les illustrations actuelles seront remplacées.",upd_running:"Mise à jour en cours",upd_started:"Mise à jour lancée : les élèves gardent l'ancienne version jusqu'à la fin.",upd_error:"Mise à jour échouée (le cours des élèves n'a pas changé)",ill_none:"Aucune illustration disponible pour ce cours.",ill_pdf_fail:"Impossible de lire le PDF « {name} ».",ill_pdf_busy:"Lecture du PDF…",ill_t:"3 · Illustrations (facultatif)",ill_help:"Schémas, figures ou images de ton cours (PNG, JPG, WebP, GIF ou SVG ; 5 Mo maximum chacune, 20 au plus). Elles sont recopiées telles quelles dans le module « Illustrations », sans aucune modification. Si tu n'en déposes pas, l'IA en crée. Un PDF est accepté : chaque page devient une illustration.",ill_cta:"Ajouter des illustrations",ill_too_big:"« {name} » dépasse 5 Mo : ignoré.",ill_bad_type:"« {name} » n'est pas une image acceptée (PNG, JPG, WebP, GIF, SVG, PDF) : ignoré.",ill_max:"20 illustrations au maximum.",ill_upload_fail:"{n} illustration(s) n'ont pas pu être envoyées.",ill_ed_t:"Illustrations",ill_ed_help:"Ces images s'affichent telles quelles dans le module « Illustrations » du cours. Tu peux ajouter une légende, les rattacher à un chapitre ou les retirer.",ill_caption_ph:"Légende (facultatif)",ill_chap_all:"Tout le cours",ill_gen_t:"Schémas créés par l'IA ({n})",ill_remove_confirm:"Retirer cette illustration ?",ill_load_fail:"Illustration indisponible.",ill_gen_replaced:"Tu as déposé des illustrations : elles remplacent les schémas créés par l'IA, qui ne seront pas affichés aux élèves.",dep_intro:"Un dépôt = un cours. Le brouillon est généré, puis tu peux le modifier avant de créer le code.",dep_prof_t:"1 · Cours du professeur",dep_prof_help:"Le support de référence : il fait foi. La structure, les définitions et les QCM s'appuient sur lui. Plusieurs fichiers possibles (lus dans l'ordre).",dep_prof_cta:"Ajouter le cours du professeur",dep_stu_t:"2 · Notes d'élèves (facultatif)",dep_stu_help:"Cours pris par des élèves : ils servent seulement à ajouter des détails ou à préciser, jamais à contredire le cours du professeur. 8 fichiers maximum.",dep_stu_cta:"Ajouter des notes d'élèves",dep_title_label:"Nom du cours",dep_create:"Créer le cours",dep_need_prof:"Ajoute d'abord au moins un fichier de cours du professeur.",dep_max_students:"8 fichiers de notes au maximum.",dep_extracting:"Création du cours…",dep_created:"Cours créé : la génération commence.",dep_notes_info:"{c} compléments d'élèves intégrés · {x} passage(s) contradictoire(s) écarté(s)",dep_remove:"Retirer",ed_btn:"✏️ Modifier et publier",ed_draft_tag:"Brouillon — pas encore de code",ed_title:"Éditeur de cours",ed_intro:"Relis et corrige le cours généré : tu peux modifier, ajouter ou supprimer des chapitres, des explications, des exemples, des exercices et des questions. Tant que tu n'as pas créé le code, rien n'est visible par les élèves. Une fois le code créé, le contenu est figé.",ed_save:"Enregistrer le brouillon",ed_publish:"Valider et créer le code",ed_saved:"Brouillon enregistré à {time}",ed_unsaved:"Modifications non enregistrées",ed_back_confirm:"Tu as des modifications non enregistrées. Quitter quand même ?",ed_locked:"Ce cours est publié : son contenu est figé et ne peut plus être modifié.",ed_chapter:"Chapitre {n}",ed_chap_title:"Titre du chapitre",ed_summary:"Cours condensé",ed_intro_f:"Introduction",ed_points:"Points clés",ed_retenir:"À retenir",ed_lexique:"Lexique",ed_term:"Terme",ed_examples:"Exemples",ed_ex_title:"Titre",ed_exos:"Exercices",ed_tf:"Vrai / faux",ed_true:"Vrai",ed_false:"Faux",ed_qcm:"Questions de QCM",ed_question:"Question",ed_option:"Réponse {n}",ed_correct:"Bonne réponse",ed_add:"+ Ajouter",ed_del:"Supprimer",ed_add_chapter:"+ Ajouter un chapitre",ed_new_chapter:"Nouveau chapitre",ed_del_chapter_confirm:"Supprimer ce chapitre et tout son contenu ?",ed_extra:"Questions transversales (grand QCM)",ed_err_nochap:"Il faut au moins un chapitre.",ed_err_qcm:"Le chapitre « {title} » doit avoir au moins {n} questions de QCM complètes (question + 4 réponses).",ed_publish_confirm:"Créer le code de ce cours ?\n\nLe contenu sera figé : tu ne pourras plus le modifier, et les élèves pourront rejoindre le cours avec le code.",ed_published_t:"Cours publié !",ed_published_text:"Voici le code à donner à tes élèves :",ed_copy:"Copier le code",ed_err_save:"Enregistrement impossible : {msg}",home_ask_t:"Poser une question",home_ask_ph:"Pose une question sur tes cours…",home_ask_btn:"Demander",chat_all_courses:"Tous mes cours",chat_card_t:"Poser une question",chat_card_d:"Pose une question, je réponds uniquement avec ce cours.",chat_title:"Poser une question au cours",chat_hint:"Réponses basées uniquement sur le contenu de ce cours · 3 questions par jour.",chat_ph:"Écris ta question…",chat_send:"Envoyer",chat_thinking:"Je cherche dans le cours…",chat_remaining:"{n} question(s) restante(s) aujourd'hui",chat_limit:"Tu as atteint la limite de 3 questions pour aujourd'hui. Reviens demain !",chat_error:"Impossible de répondre pour le moment. Réessaie dans un instant.",settings_prof_courses:"Cours rejoints par code",prof_leave_btn:"Retirer",confirm_leave_prof_module:"Retirer « {title} » de ton accueil ? Tu devras ressaisir le code du cours pour y accéder à nouveau.",prof_retry_btn:"Réessayer",prof_gen_interrupted:"Génération interrompue : supprime ce cours et redépose le fichier.", appearance_title:"Apparence", manage_matieres_modules_title:"Matières et modules affichés", consent_minor_text:"J'ai 15 ans ou plus, ou j'ai l'accord d'un parent / responsable légal pour créer ce compte.", consent_privacy_text:"J'ai lu et j'accepte les {link}.", consent_privacy_link_text:"mentions légales et la politique de confidentialité", msg_need_minor_consent:"Coche la case concernant l'âge / l'accord parental.", msg_need_privacy_consent:"Tu dois accepter les mentions légales et la politique de confidentialité.", cookie_banner_text:"Vyse AI utilise uniquement des cookies et un stockage local strictement nécessaires (connexion, préférences) — aucun traceur publicitaire ni de mesure d'audience.", cookie_banner_more:"En savoir plus", cookie_banner_ok:"J'ai compris", report_problem_title:"Signaler un problème", report_problem_text:"Décris le souci rencontré : ton message s'ouvrira dans ta messagerie, prêt à envoyer à l'adresse de contact.", ph_report_problem:"Décris le problème rencontré…", report_problem_btn:"Envoyer le signalement", report_problem_subject:"Signalement de problème — Vyse AI", msg_need_report_text:"Décris le problème avant d'envoyer.", msg_report_opened:"Ta messagerie s'ouvre avec le signalement pré-rempli.", report_account_label:"Compte", report_account_guest:"non connecté", report_lang_label:"Langue", contact_text:"Une question, une suggestion ? Écris-nous :", landing_prof_btn:"Professeur", ph_course_name:"Nom du cours", ph_prof_code:"Code unique professeur", prof_code_help:"Le code qui t'a été transmis pour activer ton accès professeur.", prof_modal_title:"Espace professeur", prof_note:"Ton espace professeur te permet de déposer tes cours et de générer des codes pour tes élèves.", prof_goto_page:"Aller à ma page professeur", prof_page_nav:"Page professeur", prof_page_nav_short:"Prof", msg_need_prof_fields:"Remplis tous les champs (nom, prénom, code).", prof_course_t:"Mon espace professeur", prof_course_text:"Connecté·e en tant que {prenom} {nom}. Dépose tes cours ci-dessous pour créer des modules.", prof_drop_t:"Déposer un cours", prof_drop_text:"Glisse un ou plusieurs fichiers de cours : un module factice est créé instantanément avec un code à partager à tes élèves (le contenu réel sera généré automatiquement plus tard, via une API).", prof_drop_cta:"Glisse tes fichiers ici, ou clique pour parcourir", prof_modules_t:"Mes modules créés", prof_no_modules:"Tu n'as encore créé aucun module.", prof_copy_code:"Copier le code", confirm_delete_module:"Supprimer ce module ? Les élèves qui l'ont rejoint n'y auront plus accès.", msg_module_create_partial:"{ok} module(s) créé(s), {fail} échec(s).", msg_modules_created:"{count} module(s) créé(s) !", msg_login_required:"Connecte-toi d'abord pour rejoindre un module.", msg_no_module:"Aucun module ne correspond à ce code.", msg_already_joined:"Tu as déjà rejoint « {title} ».", msg_module_joined:"Module « {title} » rejoint !", msg_login_to_join:"Connecte-toi pour rejoindre ce cours.", msg_need_course_code:"Entre un code de cours.", home_code_t:"Code de cours", prof_module_tag:"Module professeur", prof_module_placeholder_text:"Le contenu de ce module est en cours de préparation : il sera bientôt relié automatiquement au cours déposé par ton professeur.", brand_sub:"Choisis une matière pour commencer",
+stu_code_ph:"Mon code étudiant", stu_enter:"Entrer", stu_help:"Ton code t'a été donné par ton établissement. À ta première connexion, tu indiques ton nom et tu choisis un mot de passe.", stu_err_invalid:"Code non reconnu. Vérifie-le ou demande-le à ton professeur.", stu_err_rate:"Trop d'essais. Attends quelques minutes puis réessaie.", stu_err_server:"Connexion impossible pour le moment. Réessaie dans un instant.", stu_err_empty:"Saisis ton code étudiant.", stu_welcome:"Bienvenue !", stu_not_enrolled:"Tu n'es pas inscrit(e) à ce cours. Demande à ton professeur de t'inscrire.", etab_page_t:"Espace établissement", cls_title:"Groupes d'étudiants", cls_intro:"Crée un groupe par classe, promotion, TD ou option : chaque étudiant reçoit un code personnel, sans compte ni e-mail, et peut appartenir à plusieurs groupes (classe, TD, langue…). Le code du groupe est à donner aux professeurs, qui l'utilisent pour inscrire tout le groupe à leur cours. Toi seul connais le nom associé à chaque code (un prénom ou un pseudonyme suffit).", cls_n_codes:"{n} codes", cls_manage:"Gérer", cls_none:"Aucun groupe pour l'instant.", cls_new_t:"Nouveau groupe", cls_name_lab:"Nom du groupe", cls_name_ph:"Ex. Licence 3 AES", cls_count_lab:"Nombre de codes à générer", cls_or:"— ou —", cls_names_lab:"Colle ta liste d'étudiants (un nom ou pseudo par ligne)", cls_names_ph:"Léa\nMehdi\nÉlève 3…", cls_create_btn:"Créer le groupe et les codes", cls_err_name:"Donne un nom au groupe.", cls_err_toomany:"Maximum 500 codes à la fois.", cls_err_empty:"Indique un nombre de codes ou une liste de noms.", cls_err_notetab:"Réservé aux comptes établissement.", cls_created:"{n} codes créés (surlignés ci-dessous).", cls_back:"← Retour", cls_manager_t:"Groupe", cls_never:"jamais", cls_rename:"Renommer", cls_delete_class:"Supprimer le groupe", cls_add_lab:"Ajouter des codes", cls_add_btn:"Ajouter", cls_add_names:"Ou ajouter à partir d'une liste de noms", cls_group_code:"Code du groupe (à donner aux professeurs)", cls_group_code_help:"Un professeur saisit ce code dans son espace pour inscrire tous les étudiants du groupe à l'un de ses cours.", cls_search:"Rechercher un étudiant ou un code…", cls_print:"Imprimer les cartes", cls_regen:"Régénérer les codes", cls_delete_sel:"Supprimer l'étudiant", cls_col_groups:"Autres groupes", cls_pick_group:"Choisis un groupe", cls_add_to_btn:"Ajouter à ce groupe", cls_remove_from:"Retirer de ce groupe", cls_added_to:"{n} étudiant(s) ajouté(s) à « {name} ».", cls_removed_from:"{n} étudiant(s) retiré(s) de ce groupe.", cls_remove_confirm:"Retirer {n} étudiant(s) de ce groupe ? Ils restent dans leurs autres groupes.", cls_col_name:"Étudiant", cls_col_code:"Code", cls_col_last:"Dernière connexion", cls_col_chap:"Chapitres", cls_col_qcm:"QCM", cls_col_avg:"Moyenne", cls_col_time:"Temps", cls_shared_tip:"Astuce : imprime les cartes et découpe-les. Sur un ordinateur partagé, les étudiants doivent se déconnecter en fin de séance.", cls_no_rows:"Aucun étudiant.", cls_copy:"Cliquer pour copier", cls_n_selected:"{n} sélectionné(s)", cls_select_hint:"Coche des étudiants pour agir sur eux, ou agis sur toute la liste (impression, CSV).", cls_copied:"{code} copié.", cls_rename_prompt:"Nouveau nom ou pseudo :", cls_need_selection:"Coche d'abord un ou plusieurs étudiants.", cls_regen_confirm:"Régénérer le code de {n} étudiant(s) ? Les anciens codes ne fonctionneront plus.", cls_regenerated:"{n} nouveaux codes générés (surlignés).", cls_delete_confirm:"Supprimer {n} étudiant(s) de TOUS leurs groupes ? Leur code et leur progression seront définitivement effacés.", cls_deleted:"{n} étudiant(s) supprimé(s).", cls_delete_class_confirm:"Supprimer le groupe « {name} » ({n} étudiants) ? Les étudiants qui n'appartiennent qu'à ce groupe sont supprimés avec leur progression ; ceux qui sont aussi dans d'autres groupes sont conservés.", cls_popup_blocked:"Le navigateur a bloqué la fenêtre d'impression. Autorise les fenêtres pop-up pour ce site.", enr_title:"Inscrire des étudiants à un cours", enr_intro:"Seuls les étudiants des groupes que tu inscris ici peuvent rejoindre ton cours avec son code. Saisis le code d'un groupe (6 caractères, fourni par ton établissement) pour inscrire tout le groupe, ou le code d'un étudiant (8 caractères) pour l'inscrire seul.", enr_course_lab:"Cours", enr_code_ph:"Code du groupe (6 car.) ou code d'un étudiant (8 car.)", enr_btn:"Inscrire", enr_none_modules:"Crée d'abord un cours pour pouvoir y inscrire des étudiants.", enr_none:"Aucun groupe inscrit à ce cours pour l'instant.", enr_row:"{n} étudiants · {j} ont rejoint le cours", enr_remove:"Retirer", enr_remove_confirm:"Retirer ce groupe ? Ses étudiants perdront l'accès à ce cours.", enr_done:"Groupe « {name} » inscrit ({n} étudiants).", enr_removed:"Groupe retiré.", enr_err_code:"Code de groupe inconnu.", enr_err_empty:"Saisis le code du groupe.", enr_err_notprof:"Réservé aux comptes professeur.", enr_seats_t:"Étudiants inscrits individuellement", enr_seat_joined:"a rejoint le cours", enr_seat_waiting:"pas encore rejoint", enr_seat_done:"{name} est inscrit(e).", enr_remove_seat_confirm:"Retirer cet étudiant de ce cours ?", enr_err_format:"Un code de groupe compte 6 caractères, un code d'étudiant 8.", etab_modal_title:"Espace établissement", ph_etab_code:"Code d'accès établissement", etab_code_help:"Le code qui t'a été transmis pour activer l'accès de ton établissement.", etab_note:"L'espace établissement permet de créer les groupes d'étudiants (classe, TD, licence…) et leurs codes d'accès personnels.", etab_goto_page:"Aller à l'espace établissement", etab_page_short:"Établ.", adm_title:"Administration", adm_new_t:"Créer des codes d'accès", adm_new_help:"Un code = un compte, à usage unique. Donne-le à l'établissement (ou au professeur) : il crée son compte avec le bouton « Établissement » (ou « Professeur ») de la page d'accueil.", adm_kind_etab:"Établissement", adm_kind_prof:"Professeur", adm_n:"Nombre de codes", adm_label_ph:"Nom de l'établissement (facultatif)", adm_days:"Validité en jours", adm_create:"Générer", adm_created:"{n} code(s) créé(s) — à transmettre :", adm_codes_t:"Codes créés", adm_col_type:"Type", adm_col_label:"Libellé", adm_col_status:"État", adm_revoke:"Révoquer", adm_revoke_confirm:"Révoquer ce code ? Il ne pourra plus servir à créer un compte.", adm_st_free:"Disponible", adm_st_used:"Utilisé par {email}", adm_st_revoked:"Révoqué", adm_st_expired:"Expiré", adm_accounts_t:"Comptes professeurs et établissements", adm_col_modules:"Cours", adm_col_groups:"Groupes", adm_col_students:"Codes étudiants", acc_student_lead:"Étudiant : entre le code que ton établissement t'a donné.", acc_or_staff:"Professeur ou établissement", acc_staff_prof:"Espace professeur", acc_staff_etab:"Espace établissement", stu_pwd_ph:"Mot de passe", stu_pwd2_ph:"Confirme le mot de passe", stu_claim_t:"Première connexion", stu_claim_lead:"Indique ton prénom et ton nom (ton professeur les verra) et choisis ton mot de passe.", stu_login_t:"Connexion", stu_login_lead:"Entre le mot de passe que tu as choisi.", stu_claim_btn:"Créer mon accès", stu_login_btn:"Se connecter", stu_claim_hint:"Mot de passe : 8 caractères minimum. Garde-le : il te servira à chaque connexion avec ton code.", stu_forgot_hint:"Mot de passe oublié ? Demande à ton établissement de réinitialiser ton accès.", stu_err_pwd:"Mot de passe incorrect.", stu_err_weak:"Choisis un mot de passe d'au moins 8 caractères.", stu_err_name:"Indique ton prénom et ton nom.", stu_err_mismatch:"Les deux mots de passe ne sont pas identiques.", stu_err_claimed:"Ce code est déjà activé : entre ton mot de passe.", cls_reset_pwd:"Réinitialiser l'accès (mot de passe oublié)", cls_reset_confirm:"Réinitialiser l'accès de cet étudiant ? Il devra saisir à nouveau son nom et choisir un nouveau mot de passe.", cls_reset_done:"Accès réinitialisé : l'étudiant choisira un nouveau mot de passe à sa prochaine connexion.", landing_etab_btn:"Établissement", adm_short:"Admin", study_title:"Mes groupes de révision", study_join_t:"Rejoindre un groupe", study_join_help:"Saisis le code que t'a donné un camarade pour entrer dans son groupe et discuter avec lui.", study_code_ph:"Code du groupe", study_join_btn:"Rejoindre", study_mine_t:"Mon groupe", study_mine_have:"Tu as déjà créé ton groupe (un seul par personne). Partage son code pour inviter des camarades.", study_create_help:"Tu peux créer un seul groupe. Il te donne un code à partager avec tes camarades.", study_name_ph:"Nom du groupe (ex. Révisions droit)", study_create_btn:"Créer mon groupe", study_list_t:"Mes groupes", study_n_members:"{n} membre(s)", study_creator:"créateur", study_open_chat:"Ouvrir le chat", study_none:"Tu n'es dans aucun groupe pour l'instant.", study_members:"Membres", study_all_groups:"Mes groupes", study_leave:"Quitter", study_close:"Fermer le groupe", study_msg_ph:"Écris un message…", study_send:"Envoyer", study_rules:"Reste bienveillant : pas d'insultes, pas d'informations personnelles. Les messages sont effacés après 30 jours. Tu peux signaler un message avec ⚑.", study_empty:"Aucun message pour l'instant. Lance la discussion !", study_report:"Signaler ce message", study_report_confirm:"Signaler ce message au créateur du groupe ?", study_reported:"Message signalé, merci.", study_hide:"Supprimer ce message", study_hide_confirm:"Supprimer ce message ?", study_remove:"Retirer du groupe", study_remove_confirm:"Retirer ce membre du groupe ? Il ne pourra plus le rejoindre.", study_leave_confirm:"Quitter ce groupe ?", study_close_confirm:"Fermer ce groupe ? Plus personne n'y aura accès, et tu pourras en créer un nouveau.", study_err_code:"Saisis le code du groupe.", study_err_name:"Donne un nom d'au moins 2 caractères.", study_err_disabled:"Le chat entre étudiants est désactivé par ton établissement.", study_err_has_group:"Tu as déjà créé un groupe.", study_err_notfound:"Code de groupe inconnu.", study_err_full:"Ce groupe est complet (30 membres).", study_err_toomany:"Tu es déjà dans 5 groupes.", study_err_removed:"Tu as été retiré de ce groupe.", study_err_rate:"Doucement : trop de messages en peu de temps.", study_err_member:"Tu n'es pas membre de ce groupe.", study_etab_t:"Chat entre étudiants", study_etab_help:"Les étudiants peuvent créer un groupe de révision (un par personne) et discuter par écrit avec ceux qui entrent son code. Vous n'avez pas accès à ces conversations ; vous pouvez désactiver cette fonction pour tous vos étudiants.", study_etab_label:"Autoriser le chat entre étudiants", study_etab_on:"Chat autorisé.", study_etab_off:"Chat désactivé pour vos étudiants.",
+msg_prof_code_invalid:"Code professeur invalide, déjà utilisé ou expiré. Demande un nouveau code.", tts_listen:"Écouter le cours", tts_pause:"Pause", tts_resume:"Reprendre", tts_stop:"Arrêter", tts_speed:"Vitesse", tts_unsupported:"Lecture vocale indisponible sur ce navigateur.", brand_title:"Mon sentier de révision", prof_rename_btn:"Renommer", prof_rename_prompt:"Nouveau nom du module :", prof_status_pending:"En attente", prof_status_generating:"Génération en cours", prof_status_ready:"Prêt", prof_status_error:"Erreur de génération", prof_extract_failed:"Impossible d'extraire le texte de ce fichier.", prof_module_wait_title:"Préparation du contenu…", prof_module_wait_text:"Le cours est en cours de génération automatique à partir du fichier déposé par ton professeur. Cette page se mettra à jour automatiquement.", prof_module_error_title:"Génération impossible", prof_module_error_text:"La génération automatique du contenu de ce module a échoué. Préviens ton professeur.", prof_manage_chapters_btn:"Gérer les chapitres", prof_manage_chapters_title:"Chapitres affichés aux étudiants", prof_manage_chapters_text:"Choisis les chapitres que tes étudiants peuvent voir. Les exemples et exercices affichés s'adapteront automatiquement aux chapitres cochés.", prof_save_chapters_btn:"Enregistrer", msg_need_one_chapter:"Coche au moins un chapitre.", msg_chapters_saved:"Modifications enregistrées.", dyslexia_title:"Confort de lecture (dyslexie)", dyslexia_text:"Police adaptée, espacement augmenté, texte aligné à gauche et contrastes adoucis, d'après les recommandations pour les lecteurs dyslexiques.", dyslexia_on:"✅ Activé", dyslexia_off:"◻️ Désactivé",ed_sections:"Cours condensé (sections)",ed_sec_title:"Titre de la section",upd_btn:"Mettre à jour le cours",upd_banner_t:"Mise à jour de « {title} »",upd_banner:"Dépose la nouvelle version du cours (et, si tu veux, des notes d'étudiants et des illustrations). Le code reste le même. Les étudiants gardent l'ancienne version jusqu'à la fin de la génération, puis voient la nouvelle en rechargeant la page. Attention : le nouveau cours remplace entièrement l'ancien (tes modifications manuelles et les illustrations actuelles seront perdues) et tous les chapitres redeviennent visibles.",upd_cancel:"Annuler la mise à jour",upd_start:"Lancer la mise à jour",upd_confirm:"Remplacer le cours publié par cette nouvelle version ? Les étudiants la verront en rechargeant la page. Tes modifications manuelles et les illustrations actuelles seront remplacées.",upd_running:"Mise à jour en cours",upd_started:"Mise à jour lancée : les étudiants gardent l'ancienne version jusqu'à la fin.",upd_error:"Mise à jour échouée (le cours des étudiants n'a pas changé)",ill_none:"Aucune illustration disponible pour ce cours.",ill_pdf_fail:"Impossible de lire le PDF « {name} ».",ill_pdf_busy:"Lecture du PDF…",ill_t:"3 · Illustrations (facultatif)",ill_help:"Schémas, figures ou images de ton cours (PNG, JPG, WebP, GIF ou SVG ; 5 Mo maximum chacune, 20 au plus). Elles sont recopiées telles quelles dans le module « Illustrations », sans aucune modification. Si tu n'en déposes pas, l'IA en crée. Un PDF est accepté : chaque page devient une illustration.",ill_cta:"Ajouter des illustrations",ill_too_big:"« {name} » dépasse 5 Mo : ignoré.",ill_bad_type:"« {name} » n'est pas une image acceptée (PNG, JPG, WebP, GIF, SVG, PDF) : ignoré.",ill_max:"20 illustrations au maximum.",ill_upload_fail:"{n} illustration(s) n'ont pas pu être envoyées.",ill_ed_t:"Illustrations",ill_ed_help:"Ces images s'affichent telles quelles dans le module « Illustrations » du cours. Tu peux ajouter une légende, les rattacher à un chapitre ou les retirer.",ill_caption_ph:"Légende (facultatif)",ill_chap_all:"Tout le cours",ill_gen_t:"Schémas créés par l'IA ({n})",ill_remove_confirm:"Retirer cette illustration ?",ill_load_fail:"Illustration indisponible.",ill_gen_replaced:"Tu as déposé des illustrations : elles remplacent les schémas créés par l'IA, qui ne seront pas affichés aux étudiants.",dep_intro:"Un dépôt = un cours. Le brouillon est généré, puis tu peux le modifier avant de créer le code.",dep_prof_t:"1 · Cours du professeur",dep_prof_help:"Le support de référence : il fait foi. La structure, les définitions et les QCM s'appuient sur lui. Plusieurs fichiers possibles (lus dans l'ordre).",dep_prof_cta:"Ajouter le cours du professeur",dep_stu_t:"2 · Notes d'étudiants (facultatif)",dep_stu_help:"Cours pris par des étudiants : ils servent seulement à ajouter des détails ou à préciser, jamais à contredire le cours du professeur. 8 fichiers maximum.",dep_stu_cta:"Ajouter des notes d'étudiants",dep_title_label:"Nom du cours",dep_create:"Créer le cours",dep_need_prof:"Ajoute d'abord au moins un fichier de cours du professeur.",dep_max_students:"8 fichiers de notes au maximum.",dep_extracting:"Création du cours…",dep_created:"Cours créé : la génération commence.",dep_notes_info:"{c} compléments d'étudiants intégrés · {x} passage(s) contradictoire(s) écarté(s)",dep_remove:"Retirer",ed_btn:"✏️ Modifier et publier",ed_draft_tag:"Brouillon — pas encore de code",ed_title:"Éditeur de cours",ed_intro:"Relis et corrige le cours généré : tu peux modifier, ajouter ou supprimer des chapitres, des explications, des exemples, des exercices et des questions. Tant que tu n'as pas créé le code, rien n'est visible par les étudiants. Une fois le code créé, le contenu est figé.",ed_save:"Enregistrer le brouillon",ed_publish:"Valider et créer le code",ed_saved:"Brouillon enregistré à {time}",ed_unsaved:"Modifications non enregistrées",ed_back_confirm:"Tu as des modifications non enregistrées. Quitter quand même ?",ed_locked:"Ce cours est publié : son contenu est figé et ne peut plus être modifié.",ed_chapter:"Chapitre {n}",ed_chap_title:"Titre du chapitre",ed_summary:"Cours condensé",ed_intro_f:"Introduction",ed_points:"Points clés",ed_retenir:"À retenir",ed_lexique:"Lexique",ed_term:"Terme",ed_examples:"Exemples",ed_ex_title:"Titre",ed_exos:"Exercices",ed_tf:"Vrai / faux",ed_true:"Vrai",ed_false:"Faux",ed_qcm:"Questions de QCM",ed_question:"Question",ed_option:"Réponse {n}",ed_correct:"Bonne réponse",ed_add:"+ Ajouter",ed_del:"Supprimer",ed_add_chapter:"+ Ajouter un chapitre",ed_new_chapter:"Nouveau chapitre",ed_del_chapter_confirm:"Supprimer ce chapitre et tout son contenu ?",ed_extra:"Questions transversales (grand QCM)",ed_err_nochap:"Il faut au moins un chapitre.",ed_err_qcm:"Le chapitre « {title} » doit avoir au moins {n} questions de QCM complètes (question + 4 réponses).",ed_publish_confirm:"Créer le code de ce cours ?\n\nLe contenu sera figé : tu ne pourras plus le modifier, et les étudiants pourront rejoindre le cours avec le code.",ed_published_t:"Cours publié !",ed_published_text:"Voici le code à donner à tes étudiants :",ed_copy:"Copier le code",ed_err_save:"Enregistrement impossible : {msg}",home_ask_t:"Poser une question",home_ask_ph:"Pose une question sur tes cours…",home_ask_btn:"Demander",chat_all_courses:"Tous mes cours",chat_card_t:"Poser une question",chat_card_d:"Pose une question, je réponds uniquement avec ce cours.",chat_title:"Poser une question au cours",chat_hint:"Réponses basées uniquement sur le contenu de ce cours · 3 questions par jour.",chat_ph:"Écris ta question…",chat_send:"Envoyer",chat_thinking:"Je cherche dans le cours…",chat_remaining:"{n} question(s) restante(s) aujourd'hui",chat_limit:"Tu as atteint la limite de 3 questions pour aujourd'hui. Reviens demain !",chat_error:"Impossible de répondre pour le moment. Réessaie dans un instant.",settings_prof_courses:"Cours rejoints par code",prof_leave_btn:"Retirer",confirm_leave_prof_module:"Retirer « {title} » de ton accueil ? Tu devras ressaisir le code du cours pour y accéder à nouveau.",prof_retry_btn:"Réessayer",prof_gen_interrupted:"Génération interrompue : supprime ce cours et redépose le fichier.", appearance_title:"Apparence", manage_matieres_modules_title:"Matières et modules affichés", consent_minor_text:"J'ai 15 ans ou plus, ou j'ai l'accord d'un parent / responsable légal pour créer ce compte.", consent_privacy_text:"J'ai lu et j'accepte les {link}.", consent_privacy_link_text:"mentions légales et la politique de confidentialité", msg_need_minor_consent:"Coche la case concernant l'âge / l'accord parental.", msg_need_privacy_consent:"Tu dois accepter les mentions légales et la politique de confidentialité.", cookie_banner_text:"Vyse AI utilise uniquement des cookies et un stockage local strictement nécessaires (connexion, préférences) — aucun traceur publicitaire ni de mesure d'audience.", cookie_banner_more:"En savoir plus", cookie_banner_ok:"J'ai compris", report_problem_title:"Signaler un problème", report_problem_text:"Décris le souci rencontré : ton message s'ouvrira dans ta messagerie, prêt à envoyer à l'adresse de contact.", ph_report_problem:"Décris le problème rencontré…", report_problem_btn:"Envoyer le signalement", report_problem_subject:"Signalement de problème — Vyse AI", msg_need_report_text:"Décris le problème avant d'envoyer.", msg_report_opened:"Ta messagerie s'ouvre avec le signalement pré-rempli.", report_account_label:"Compte", report_account_guest:"non connecté", report_lang_label:"Langue", contact_text:"Une question, une suggestion ? Écris-nous :", landing_prof_btn:"Professeur", ph_course_name:"Nom du cours", ph_prof_code:"Code unique professeur", prof_code_help:"Le code qui t'a été transmis pour activer ton accès professeur.", prof_modal_title:"Espace professeur", prof_note:"Ton espace professeur te permet de déposer tes cours et de générer des codes pour tes étudiants.", prof_goto_page:"Aller à ma page professeur", prof_page_nav:"Page professeur", prof_page_nav_short:"Prof", msg_need_prof_fields:"Remplis tous les champs (nom, prénom, code).", prof_course_t:"Mon espace professeur", prof_course_text:"Connecté·e en tant que {prenom} {nom}. Dépose tes cours ci-dessous pour créer des modules.", prof_drop_t:"Déposer un cours", prof_drop_text:"Glisse un ou plusieurs fichiers de cours : un module factice est créé instantanément avec un code à partager à tes étudiants (le contenu réel sera généré automatiquement plus tard, via une API).", prof_drop_cta:"Glisse tes fichiers ici, ou clique pour parcourir", prof_modules_t:"Mes modules créés", prof_no_modules:"Tu n'as encore créé aucun module.", prof_copy_code:"Copier le code", confirm_delete_module:"Supprimer ce module ? Les étudiants qui l'ont rejoint n'y auront plus accès.", msg_module_create_partial:"{ok} module(s) créé(s), {fail} échec(s).", msg_modules_created:"{count} module(s) créé(s) !", msg_login_required:"Connecte-toi d'abord pour rejoindre un module.", msg_no_module:"Aucun module ne correspond à ce code.", msg_already_joined:"Tu as déjà rejoint « {title} ».", msg_module_joined:"Module « {title} » rejoint !", msg_login_to_join:"Connecte-toi pour rejoindre ce cours.", msg_need_course_code:"Entre un code de cours.", home_code_t:"Code de cours", prof_module_tag:"Module professeur", prof_module_placeholder_text:"Le contenu de ce module est en cours de préparation : il sera bientôt relié automatiquement au cours déposé par ton professeur.", brand_sub:"Choisis une matière pour commencer",
 matiere_brand_sub:"Sentier de révision",
 prof_not_validated:"Ce compte n'est pas validé comme professeur. Pour accéder à l'espace professeur, crée un compte professeur avec un code valide.",
 tt_account:"Se connecter / créer un compte", tt_lang:"Langue", tt_teacher:"Mes groupes", tt_theme:"Changer de thème", tt_settings:"Réglages",
@@ -1317,7 +1325,7 @@ btn_save:"Enregistrer", msg_saving:"Enregistrement…", msg_saved:"Enregistré !
 vis_public_t:"Matières (accessibles à tous par défaut)", vis_real_t:"Cours réels (masqués par défaut — à activer pour ce groupe)",
 progress_of:"Progression de {name}", progress_chapters_t:"Chapitres validés", progress_time_t:"Temps passé par chapitre",
 progress_no_time:"Pas encore de temps enregistré.", progress_attempts_t:"Tentatives de QCM (25 plus récentes)", progress_no_attempts:"Aucune tentative de QCM enregistrée.",
-chapters_validated_suffix:"chapitres validés", lang_title:"Langue", legal_editor_t:"Éditeur du site", legal_editor_body:"Vyse AI est un projet personnel édité par Thomas LEVEQUE, à titre individuel et non commercial (projet d'étude). Contact : contact.vyseai@gmail.com.", legal_host_t:"Hébergement", legal_host_body:"Ce site est hébergé par Vercel Inc. — 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis.", legal_data_t:"Données personnelles", legal_data_body:"La création d'un compte (email, mot de passe, prénom/nom) et la progression associée (chapitres validés, temps passé, tentatives de QCM) sont stockées via Supabase, utilisées uniquement pour faire fonctionner le service, et ne sont ni revendues ni partagées. Tu peux à tout moment demander la suppression de ton compte et de tes données depuis la page \"Mon compte\", ou en écrivant à l'adresse de contact ci-dessus.", legal_cookies_t:"Cookies et stockage local", legal_cookies_body:"Le site utilise le stockage local de ton navigateur (et, si tu es connecté·e, un cookie de session) uniquement pour te reconnaître et sauvegarder tes préférences (langue, thème, disposition) et ta progression. Aucun traceur publicitaire n'est utilisé.", legal_ip_t:"Propriété intellectuelle", legal_ip_body:"Les contenus, textes, illustrations et le nom \"Vyse AI\" sont la propriété de leur auteur. Toute reproduction sans autorisation est interdite, à l'exception des contenus pédagogiques fournis par leurs auteurs d'origine.", legal_liability_t:"Responsabilité", legal_liability_body:"Ce site est un projet pédagogique en développement. Certains contenus sont des exemples de démonstration et ne sauraient se substituer à un cours officiel.", landing_tagline:"L'IA au service de vos études", landing_login_btn:"Se connecter", landing_code_ph:"Code de cours", landing_code_btn:"Rejoindre", landing_code_soon:"Bientôt disponible", landing_legal_link:"Mentions légales", landing_contact_link:"Contact", landing_demo_link:"Accéder à l'exemple →", legal_title:"Mentions légales", contact_title:"Contact", contact_soon:"Cette section sera bientôt disponible.", lang_choice_title:"Choisis ta langue", lang_choice_text:"Tu pourras la changer à tout moment dans les réglages.", dashboard_trend_t:"Évolution des scores", dashboard_trend_empty:"Pas encore assez de tentatives pour une tendance", home_greeting_hi:"Bonjour {name} 👋", home_greeting_hi_guest:"Bonjour 👋", home_greeting_sub:"Prêt·e à avancer aujourd'hui ?", home_continue_t:"Continuer", home_continue_empty:"Commence une matière", home_stats_t:"Ma progression", home_stats_line:"{time} · {n} tentatives", home_stats_guest:"Connecte-toi pour voir tes stats",
+chapters_validated_suffix:"chapitres validés", lang_title:"Langue", legal_editor_t:"Éditeur du site", legal_editor_body:"Vyse AI est un projet personnel édité par Thomas LEVEQUE, à titre individuel et non commercial (projet d'étude). Contact : contact.vyseai@gmail.com.", legal_host_t:"Hébergement", legal_host_body:"Ce site est hébergé par Vercel Inc. — 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis.", legal_data_t:"Données personnelles", legal_data_body:"L'accès d'un étudiant (code remis par son établissement, prénom, nom, mot de passe chiffré), ou le compte d'un enseignant ou d'un établissement (email, mot de passe, prénom/nom), et la progression associée (chapitres validés, temps passé, tentatives de QCM) sont stockées via Supabase, utilisées uniquement pour faire fonctionner le service, et ne sont ni revendues ni partagées. Tu peux à tout moment demander la suppression de ton compte et de tes données depuis la page \"Mon compte\", ou en écrivant à l'adresse de contact ci-dessus.", legal_cookies_t:"Cookies et stockage local", legal_cookies_body:"Le site utilise le stockage local de ton navigateur (et, si tu es connecté·e, un cookie de session) uniquement pour te reconnaître et sauvegarder tes préférences (langue, thème, disposition) et ta progression. Aucun traceur publicitaire n'est utilisé.", legal_ip_t:"Propriété intellectuelle", legal_ip_body:"Les contenus, textes, illustrations et le nom \"Vyse AI\" sont la propriété de leur auteur. Toute reproduction sans autorisation est interdite, à l'exception des contenus pédagogiques fournis par leurs auteurs d'origine.", legal_liability_t:"Responsabilité", legal_liability_body:"Ce site est un projet pédagogique en développement. Certains contenus sont des exemples de démonstration et ne sauraient se substituer à un cours officiel.", landing_tagline:"L'IA au service de vos études", landing_login_btn:"Se connecter", landing_code_ph:"Code de cours", landing_code_btn:"Rejoindre", landing_code_soon:"Bientôt disponible", landing_legal_link:"Mentions légales", landing_contact_link:"Contact", landing_demo_link:"Accéder à l'exemple →", legal_title:"Mentions légales", contact_title:"Contact", contact_soon:"Cette section sera bientôt disponible.", lang_choice_title:"Choisis ta langue", lang_choice_text:"Tu pourras la changer à tout moment dans les réglages.", dashboard_trend_t:"Évolution des scores", dashboard_trend_empty:"Pas encore assez de tentatives pour une tendance", home_greeting_hi:"Bonjour {name} 👋", home_greeting_hi_guest:"Bonjour 👋", home_greeting_sub:"Prêt·e à avancer aujourd'hui ?", home_continue_t:"Continuer", home_continue_empty:"Commence une matière", home_stats_t:"Ma progression", home_stats_line:"{time} · {n} tentatives", home_stats_guest:"Connecte-toi pour voir tes stats",
 nav_home:"Accueil",
 groups_home_desc:"Crée ou rejoins un groupe de révision.",
 dashboard_subject_time:"Temps : {time}", dashboard_subject_attempts:"{n} tentative(s) de QCM",
@@ -1326,7 +1334,7 @@ tt_dashboard:"Tableau de bord", dashboard_title:"Mon tableau de bord", dashboard
 subj_math_name:"Mathématiques", subj_math_desc:"Algèbre, géométrie, fonctions…", subj_hist_name:"Histoire-Géographie", subj_hist_desc:"Grandes périodes et repères", subj_svt_name:"SVT", subj_svt_desc:"Sciences de la vie et de la Terre", subj_phys_name:"Physique-Chimie", subj_phys_desc:"Lois, réactions, mesures", subj_ang_name:"Anglais", subj_ang_desc:"Vocabulaire, grammaire, culture", ph_resume_intro:"Résumé à compléter pour le chapitre {n} de {mat}.", ph_point_cle:"Point clé {p} du chapitre {n} — à préciser", ph_retenir:"À retenir : la synthèse en une phrase du chapitre {n} viendra ici.", ph_lex_term:"Terme {i} (chap. {n})", ph_lex_def:"Définition à compléter pour ce terme du chapitre {n}.", ph_ex_titre:"Exemple {i} — chapitre {n}", ph_ex_texte:"Exemple concret à rédiger pour une notion du chapitre {n}.", ph_exo_enonce:"Exercice {i} du chapitre {n} — énoncé à compléter.", ph_exo_correction:"Corrigé à compléter pour l'exercice {i}.", ph_question_wrap:"{prefix} — Question {i}. {q}", q_tpl1:"Que signifie principalement l'élément n°{i} du cours ?", q_tpl2:"Quel est le point à retenir associé à la notion n°{i} ?", q_tpl3:"Comment définirais-tu correctement le concept n°{i} ?", q_tpl4:"Quelle affirmation correspond à l'idée n°{i} du cours ?", ph_correct_opt:"Réponse correcte à préciser (item {i})", ph_distractor:"Distracteur {k} à préciser (item {i})", ph_tf_stmt:"{prefix} : affirmation n°{i} à vérifier — à remplacer par une vraie affirmation du cours.", question_transversale:"Question transversale"
 },
 en:{
-stu_code_ph:"My student code", stu_enter:"Enter", stu_help:"Your teacher gave you this code. No email or password needed.", stu_err_invalid:"Code not recognised. Check it or ask your teacher.", stu_err_rate:"Too many attempts. Wait a few minutes and try again.", stu_err_server:"Can't sign in right now. Please try again in a moment.", stu_err_empty:"Enter your student code.", stu_welcome:"Welcome!", stu_not_enrolled:"You are not enrolled in this course. Ask your teacher to enrol you.", etab_page_t:"Institution area", cls_title:"Student groups", cls_intro:"Create one group per class, cohort, tutorial or option: each student gets a personal code, with no account or email, and can belong to several groups (class, tutorial, language…). The group code is for teachers, who use it to enrol the whole group in their course. Only you know the name linked to each code (a first name or nickname is enough).", cls_n_codes:"{n} codes", cls_manage:"Manage", cls_none:"No group yet.", cls_new_t:"New group", cls_name_lab:"Group name", cls_name_ph:"E.g. Year 3 Business", cls_count_lab:"Number of codes to generate", cls_or:"— or —", cls_names_lab:"Paste your student list (one name or nickname per line)", cls_names_ph:"Lea\nMehdi\nStudent 3…", cls_create_btn:"Create the group and codes", cls_err_name:"Give the group a name.", cls_err_toomany:"Maximum 500 codes at a time.", cls_err_empty:"Enter a number of codes or a list of names.", cls_err_notetab:"Institution accounts only.", cls_created:"{n} codes created (highlighted below).", cls_back:"← Back", cls_manager_t:"Group", cls_never:"never", cls_rename:"Rename", cls_delete_class:"Delete group", cls_add_lab:"Add codes", cls_add_btn:"Add", cls_add_names:"Or add from a list of names", cls_group_code:"Group code (give it to teachers)", cls_group_code_help:"A teacher enters this code in their area to enrol every student of the group in one of their courses.", cls_search:"Search a student or code…", cls_print:"Print cards", cls_regen:"Regenerate codes", cls_delete_sel:"Delete student", cls_col_groups:"Other groups", cls_pick_group:"Pick a group", cls_add_to_btn:"Add to this group", cls_remove_from:"Remove from this group", cls_added_to:"{n} student(s) added to \"{name}\".", cls_removed_from:"{n} student(s) removed from this group.", cls_remove_confirm:"Remove {n} student(s) from this group? They stay in their other groups.", cls_col_name:"Student", cls_col_code:"Code", cls_col_last:"Last login", cls_col_chap:"Chapters", cls_col_qcm:"Quizzes", cls_col_avg:"Average", cls_col_time:"Time", cls_shared_tip:"Tip: print the cards and cut them out. On a shared computer, students should log out at the end of the session.", cls_no_rows:"No students.", cls_copy:"Click to copy", cls_n_selected:"{n} selected", cls_select_hint:"Tick students to act on them, or act on the whole list (print, CSV).", cls_copied:"{code} copied.", cls_rename_prompt:"New name or nickname:", cls_need_selection:"Tick one or more students first.", cls_regen_confirm:"Regenerate the code of {n} student(s)? Old codes will stop working.", cls_regenerated:"{n} new codes generated (highlighted).", cls_delete_confirm:"Delete {n} student(s) from ALL their groups? Their code and progress will be permanently erased.", cls_deleted:"{n} student(s) deleted.", cls_delete_class_confirm:"Delete the group \"{name}\" ({n} students)? Students who belong only to this group are deleted with their progress; those also in other groups are kept.", cls_popup_blocked:"Your browser blocked the print window. Allow pop-ups for this site.", enr_title:"Enrol students in a course", enr_intro:"Only students from the groups you enrol here can join your course with its code. Ask your institution for the group code.", enr_course_lab:"Course", enr_code_ph:"Group code", enr_btn:"Enrol the group", enr_none_modules:"Create a course first to enrol students in it.", enr_none:"No group enrolled in this course yet.", enr_row:"{n} students · {j} joined the course", enr_remove:"Remove", enr_remove_confirm:"Remove this group? Its students will lose access to this course.", enr_done:"Group \"{name}\" enrolled ({n} students).", enr_removed:"Group removed.", enr_err_code:"Unknown group code.", enr_err_empty:"Enter the group code.", enr_err_notprof:"Teacher accounts only.",
+stu_code_ph:"My student code", stu_enter:"Enter", stu_help:"Your institution gave you this code. The first time, you enter your name and choose a password.", stu_err_invalid:"Code not recognised. Check it or ask your teacher.", stu_err_rate:"Too many attempts. Wait a few minutes and try again.", stu_err_server:"Can't sign in right now. Please try again in a moment.", stu_err_empty:"Enter your student code.", stu_welcome:"Welcome!", stu_not_enrolled:"You are not enrolled in this course. Ask your teacher to enrol you.", etab_page_t:"Institution area", cls_title:"Student groups", cls_intro:"Create one group per class, cohort, tutorial or option: each student gets a personal code, with no account or email, and can belong to several groups (class, tutorial, language…). The group code is for teachers, who use it to enrol the whole group in their course. Only you know the name linked to each code (a first name or nickname is enough).", cls_n_codes:"{n} codes", cls_manage:"Manage", cls_none:"No group yet.", cls_new_t:"New group", cls_name_lab:"Group name", cls_name_ph:"E.g. Year 3 Business", cls_count_lab:"Number of codes to generate", cls_or:"— or —", cls_names_lab:"Paste your student list (one name or nickname per line)", cls_names_ph:"Lea\nMehdi\nStudent 3…", cls_create_btn:"Create the group and codes", cls_err_name:"Give the group a name.", cls_err_toomany:"Maximum 500 codes at a time.", cls_err_empty:"Enter a number of codes or a list of names.", cls_err_notetab:"Institution accounts only.", cls_created:"{n} codes created (highlighted below).", cls_back:"← Back", cls_manager_t:"Group", cls_never:"never", cls_rename:"Rename", cls_delete_class:"Delete group", cls_add_lab:"Add codes", cls_add_btn:"Add", cls_add_names:"Or add from a list of names", cls_group_code:"Group code (give it to teachers)", cls_group_code_help:"A teacher enters this code in their area to enrol every student of the group in one of their courses.", cls_search:"Search a student or code…", cls_print:"Print cards", cls_regen:"Regenerate codes", cls_delete_sel:"Delete student", cls_col_groups:"Other groups", cls_pick_group:"Pick a group", cls_add_to_btn:"Add to this group", cls_remove_from:"Remove from this group", cls_added_to:"{n} student(s) added to \"{name}\".", cls_removed_from:"{n} student(s) removed from this group.", cls_remove_confirm:"Remove {n} student(s) from this group? They stay in their other groups.", cls_col_name:"Student", cls_col_code:"Code", cls_col_last:"Last login", cls_col_chap:"Chapters", cls_col_qcm:"Quizzes", cls_col_avg:"Average", cls_col_time:"Time", cls_shared_tip:"Tip: print the cards and cut them out. On a shared computer, students should log out at the end of the session.", cls_no_rows:"No students.", cls_copy:"Click to copy", cls_n_selected:"{n} selected", cls_select_hint:"Tick students to act on them, or act on the whole list (print, CSV).", cls_copied:"{code} copied.", cls_rename_prompt:"New name or nickname:", cls_need_selection:"Tick one or more students first.", cls_regen_confirm:"Regenerate the code of {n} student(s)? Old codes will stop working.", cls_regenerated:"{n} new codes generated (highlighted).", cls_delete_confirm:"Delete {n} student(s) from ALL their groups? Their code and progress will be permanently erased.", cls_deleted:"{n} student(s) deleted.", cls_delete_class_confirm:"Delete the group \"{name}\" ({n} students)? Students who belong only to this group are deleted with their progress; those also in other groups are kept.", cls_popup_blocked:"Your browser blocked the print window. Allow pop-ups for this site.", enr_title:"Enrol students in a course", enr_intro:"Only students from the groups you enrol here can join your course with its code. Enter a group code (6 characters, given by your institution) to enrol the whole group, or a student code (8 characters) to enrol one student.", enr_course_lab:"Course", enr_code_ph:"Group code (6 chars) or student code (8 chars)", enr_btn:"Enrol", enr_none_modules:"Create a course first to enrol students in it.", enr_none:"No group enrolled in this course yet.", enr_row:"{n} students · {j} joined the course", enr_remove:"Remove", enr_remove_confirm:"Remove this group? Its students will lose access to this course.", enr_done:"Group \"{name}\" enrolled ({n} students).", enr_removed:"Group removed.", enr_err_code:"Unknown group code.", enr_err_empty:"Enter the group code.", enr_err_notprof:"Teacher accounts only.", enr_seats_t:"Students enrolled individually", enr_seat_joined:"joined the course", enr_seat_waiting:"has not joined yet", enr_seat_done:"{name} is enrolled.", enr_remove_seat_confirm:"Remove this student from this course?", enr_err_format:"A group code has 6 characters, a student code 8.", etab_modal_title:"Institution area", ph_etab_code:"Institution access code", etab_code_help:"The code you were given to activate your institution's access.", etab_note:"The institution area lets you create student groups (class, tutorial, degree…) and their personal access codes.", etab_goto_page:"Go to the institution area", etab_page_short:"Inst.", adm_title:"Administration", adm_new_t:"Create access codes", adm_new_help:"One code = one account, single use. Give it to the institution (or teacher): they create their account with the “Institution” (or “Teacher”) button on the home page.", adm_kind_etab:"Institution", adm_kind_prof:"Teacher", adm_n:"Number of codes", adm_label_ph:"Institution name (optional)", adm_days:"Validity in days", adm_create:"Generate", adm_created:"{n} code(s) created — to hand over:", adm_codes_t:"Codes created", adm_col_type:"Type", adm_col_label:"Label", adm_col_status:"Status", adm_revoke:"Revoke", adm_revoke_confirm:"Revoke this code? It can no longer be used to create an account.", adm_st_free:"Available", adm_st_used:"Used by {email}", adm_st_revoked:"Revoked", adm_st_expired:"Expired", adm_accounts_t:"Teacher and institution accounts", adm_col_modules:"Courses", adm_col_groups:"Groups", adm_col_students:"Student codes", acc_student_lead:"Student: enter the code your institution gave you.", acc_or_staff:"Teacher or institution", acc_staff_prof:"Teacher area", acc_staff_etab:"Institution area", stu_pwd_ph:"Password", stu_pwd2_ph:"Confirm password", stu_claim_t:"First sign-in", stu_claim_lead:"Enter your first and last name (your teacher will see them) and choose your password.", stu_login_t:"Sign in", stu_login_lead:"Enter the password you chose.", stu_claim_btn:"Create my access", stu_login_btn:"Sign in", stu_claim_hint:"Password: at least 8 characters. Keep it: you'll need it with your code each time.", stu_forgot_hint:"Forgot your password? Ask your institution to reset your access.", stu_err_pwd:"Wrong password.", stu_err_weak:"Choose a password of at least 8 characters.", stu_err_name:"Enter your first and last name.", stu_err_mismatch:"The two passwords don't match.", stu_err_claimed:"This code is already activated: enter your password.", cls_reset_pwd:"Reset access (forgotten password)", cls_reset_confirm:"Reset this student's access? They will have to enter their name again and choose a new password.", cls_reset_done:"Access reset: the student will choose a new password at next sign-in.", landing_etab_btn:"Institution", adm_short:"Admin", study_title:"My study groups", study_join_t:"Join a group", study_join_help:"Enter the code a classmate gave you to join their group and chat.", study_code_ph:"Group code", study_join_btn:"Join", study_mine_t:"My group", study_mine_have:"You already created your group (one per person). Share its code to invite classmates.", study_create_help:"You can create one group. It gives you a code to share with classmates.", study_name_ph:"Group name (e.g. Law revision)", study_create_btn:"Create my group", study_list_t:"My groups", study_n_members:"{n} member(s)", study_creator:"creator", study_open_chat:"Open chat", study_none:"You're not in any group yet.", study_members:"Members", study_all_groups:"My groups", study_leave:"Leave", study_close:"Close group", study_msg_ph:"Write a message…", study_send:"Send", study_rules:"Be kind: no insults, no personal information. Messages are erased after 30 days. Report a message with ⚑.", study_empty:"No messages yet. Start the conversation!", study_report:"Report this message", study_report_confirm:"Report this message to the group creator?", study_reported:"Message reported, thanks.", study_hide:"Delete this message", study_hide_confirm:"Delete this message?", study_remove:"Remove from group", study_remove_confirm:"Remove this member? They won't be able to rejoin.", study_leave_confirm:"Leave this group?", study_close_confirm:"Close this group? Nobody will have access any more, and you can create a new one.", study_err_code:"Enter the group code.", study_err_name:"Give a name of at least 2 characters.", study_err_disabled:"Chat between students is turned off by your institution.", study_err_has_group:"You already created a group.", study_err_notfound:"Unknown group code.", study_err_full:"This group is full (30 members).", study_err_toomany:"You're already in 5 groups.", study_err_removed:"You were removed from this group.", study_err_rate:"Slow down: too many messages in a short time.", study_err_member:"You're not a member of this group.", study_etab_t:"Chat between students", study_etab_help:"Students can create one study group each and chat in writing with those who enter its code. You cannot read these conversations; you can turn this feature off for all your students.", study_etab_label:"Allow chat between students", study_etab_on:"Chat allowed.", study_etab_off:"Chat turned off for your students.",
 msg_prof_code_invalid:"Invalid, already used or expired teacher code. Ask for a new one.", tts_listen:"Listen to the course", tts_pause:"Pause", tts_resume:"Resume", tts_stop:"Stop", tts_speed:"Speed", tts_unsupported:"Voice reading is not available in this browser.", brand_title:"My revision path", prof_rename_btn:"Rename", prof_rename_prompt:"New module name:", prof_status_pending:"Pending", prof_status_generating:"Generating", prof_status_ready:"Ready", prof_status_error:"Generation error", prof_extract_failed:"Couldn't extract text from this file.", prof_module_wait_title:"Preparing content…", prof_module_wait_text:"This course is being generated automatically from the file your teacher uploaded. This page will update on its own.", prof_module_error_title:"Generation failed", prof_module_error_text:"Automatic content generation for this module failed. Let your teacher know.", prof_manage_chapters_btn:"Manage chapters", prof_manage_chapters_title:"Chapters shown to students", prof_manage_chapters_text:"Choose which chapters your students can see. The examples and exercises shown will automatically match the checked chapters.", prof_save_chapters_btn:"Save", msg_need_one_chapter:"Check at least one chapter.", msg_chapters_saved:"Changes saved.", dyslexia_title:"Reading comfort (dyslexia)", dyslexia_text:"Adapted font, increased spacing, left-aligned text and softened contrast, based on recommendations for dyslexic readers.", dyslexia_on:"✅ On", dyslexia_off:"◻️ Off",ed_sections:"Condensed course (sections)",ed_sec_title:"Section title",upd_btn:"Update the course",upd_banner_t:"Updating “{title}”",upd_banner:"Upload the new version of the course (and, if you like, student notes and illustrations). The code stays the same. Students keep the old version until generation is finished, then see the new one when they reload the page. Note: the new course fully replaces the old one (your manual edits and the current illustrations will be lost) and all chapters become visible again.",upd_cancel:"Cancel the update",upd_start:"Start the update",upd_confirm:"Replace the published course with this new version? Students will see it when they reload the page. Your manual edits and the current illustrations will be replaced.",upd_running:"Update in progress",upd_started:"Update started: students keep the old version until it finishes.",upd_error:"Update failed (the students' course has not changed)",ill_none:"No illustration available for this course.",ill_pdf_fail:"Could not read the PDF “{name}”.",ill_pdf_busy:"Reading the PDF…",ill_t:"3 · Illustrations (optional)",ill_help:"Diagrams, figures or images from your course (PNG, JPG, WebP, GIF or SVG; 5 MB maximum each, 20 at most). They are copied as they are into the “Illustrations” module, with no modification at all. If you upload none, the AI creates some. A PDF is accepted: each page becomes one illustration.",ill_cta:"Add illustrations",ill_too_big:"“{name}” is over 5 MB: skipped.",ill_bad_type:"“{name}” is not an accepted image (PNG, JPG, WebP, GIF, SVG, PDF): skipped.",ill_max:"20 illustrations maximum.",ill_upload_fail:"{n} illustration(s) could not be uploaded.",ill_ed_t:"Illustrations",ill_ed_help:"These images appear as they are in the course's “Illustrations” module. You can add a caption, attach them to a chapter or remove them.",ill_caption_ph:"Caption (optional)",ill_chap_all:"Whole course",ill_gen_t:"Diagrams created by the AI ({n})",ill_remove_confirm:"Remove this illustration?",ill_load_fail:"Illustration unavailable.",ill_gen_replaced:"You uploaded illustrations: they replace the AI-created diagrams, which will not be shown to students.",dep_intro:"One upload = one course. A draft is generated, then you can edit it before creating the code.",dep_prof_t:"1 · Teacher's course",dep_prof_help:"The reference material: it is authoritative. Structure, definitions and quizzes are built on it. Several files allowed (read in order).",dep_prof_cta:"Add the teacher's course",dep_stu_t:"2 · Student notes (optional)",dep_stu_help:"Notes taken by students: they only add details or clarify, and never contradict the teacher's course. 8 files maximum.",dep_stu_cta:"Add student notes",dep_title_label:"Course name",dep_create:"Create the course",dep_need_prof:"First add at least one teacher course file.",dep_max_students:"8 note files maximum.",dep_extracting:"Creating the course…",dep_created:"Course created: generation is starting.",dep_notes_info:"{c} student additions merged · {x} contradicting passage(s) set aside",dep_remove:"Remove",ed_btn:"✏️ Edit & publish",ed_draft_tag:"Draft — no code yet",ed_title:"Course editor",ed_intro:"Review and correct the generated course: you can edit, add or delete chapters, explanations, examples, exercises and questions. Until you create the code, nothing is visible to students. Once the code is created, the content is locked.",ed_save:"Save draft",ed_publish:"Validate and create the code",ed_saved:"Draft saved at {time}",ed_unsaved:"Unsaved changes",ed_back_confirm:"You have unsaved changes. Leave anyway?",ed_locked:"This course is published: its content is locked and can no longer be edited.",ed_chapter:"Chapter {n}",ed_chap_title:"Chapter title",ed_summary:"Summary",ed_intro_f:"Introduction",ed_points:"Key points",ed_retenir:"To remember",ed_lexique:"Glossary",ed_term:"Term",ed_examples:"Examples",ed_ex_title:"Title",ed_exos:"Exercises",ed_tf:"True / false",ed_true:"True",ed_false:"False",ed_qcm:"Quiz questions",ed_question:"Question",ed_option:"Answer {n}",ed_correct:"Correct answer",ed_add:"+ Add",ed_del:"Delete",ed_add_chapter:"+ Add a chapter",ed_new_chapter:"New chapter",ed_del_chapter_confirm:"Delete this chapter and all its content?",ed_extra:"Cross-chapter questions (final quiz)",ed_err_nochap:"At least one chapter is required.",ed_err_qcm:"Chapter “{title}” needs at least {n} complete quiz questions (question + 4 answers).",ed_publish_confirm:"Create the code for this course?\n\nThe content will be locked: you won't be able to edit it any more, and students will be able to join with the code.",ed_published_t:"Course published!",ed_published_text:"Here is the code to give your students:",ed_copy:"Copy code",ed_err_save:"Could not save: {msg}",home_ask_t:"Ask a question",home_ask_ph:"Ask a question about your courses…",home_ask_btn:"Ask",chat_all_courses:"All my courses",chat_card_t:"Ask a question",chat_card_d:"Ask a question — I answer using this course only.",chat_title:"Ask the course a question",chat_hint:"Answers based only on this course's content · 3 questions per day.",chat_ph:"Write your question…",chat_send:"Send",chat_thinking:"Searching the course…",chat_remaining:"{n} question(s) left today",chat_limit:"You have reached the limit of 3 questions for today. Come back tomorrow!",chat_error:"Unable to answer right now. Please try again in a moment.",settings_prof_courses:"Courses joined with a code",prof_leave_btn:"Remove",confirm_leave_prof_module:"Remove “{title}” from your home? You will need to enter the course code again to get it back.",prof_retry_btn:"Retry",prof_gen_interrupted:"Generation interrupted: delete this course and upload the file again.", appearance_title:"Appearance", manage_matieres_modules_title:"Displayed subjects and modules", consent_minor_text:"I am 15 or older, or I have a parent's/legal guardian's permission to create this account.", consent_privacy_text:"I have read and accept the {link}.", consent_privacy_link_text:"legal notice and privacy policy", msg_need_minor_consent:"Check the age / parental consent box.", msg_need_privacy_consent:"You must accept the legal notice and privacy policy.", cookie_banner_text:"Vyse AI only uses strictly necessary cookies and local storage (login, preferences) — no advertising trackers or audience measurement.", cookie_banner_more:"Learn more", cookie_banner_ok:"Got it", report_problem_title:"Report a problem", report_problem_text:"Describe the issue you ran into: your message will open in your mail app, ready to send to the contact address.", ph_report_problem:"Describe the problem you ran into…", report_problem_btn:"Send report", report_problem_subject:"Problem report — Vyse AI", msg_need_report_text:"Describe the problem before sending.", msg_report_opened:"Your mail app is opening with the report pre-filled.", report_account_label:"Account", report_account_guest:"not logged in", report_lang_label:"Language", contact_text:"A question, a suggestion? Write to us:", landing_prof_btn:"Teacher", ph_course_name:"Course name", ph_prof_code:"Unique teacher code", prof_code_help:"The code you were given to activate your teacher access.", prof_modal_title:"Teacher space", prof_note:"Your teacher space lets you upload your courses and generate codes for your students.", prof_goto_page:"Go to my teacher page", prof_page_nav:"Teacher page", prof_page_nav_short:"Teacher", msg_need_prof_fields:"Fill in all the fields (last name, first name, code).", prof_course_t:"My teacher space", prof_course_text:"Signed in as {prenom} {nom}. Drop your courses below to create modules.", prof_drop_t:"Upload a course", prof_drop_text:"Drop one or more course files: a placeholder module is created instantly with a code to share with your students (the real content will be generated automatically later, via an API).", prof_drop_cta:"Drop your files here, or click to browse", prof_modules_t:"My created modules", prof_no_modules:"You haven't created any modules yet.", prof_copy_code:"Copy code", confirm_delete_module:"Delete this module? Students who joined it will lose access.", msg_module_create_partial:"{ok} module(s) created, {fail} failure(s).", msg_modules_created:"{count} module(s) created!", msg_login_required:"Log in first to join a module.", msg_no_module:"No module matches this code.", msg_already_joined:"You already joined \"{title}\".", msg_module_joined:"Joined module \"{title}\"!", msg_login_to_join:"Log in to join this course.", msg_need_course_code:"Enter a course code.", home_code_t:"Course code", prof_module_tag:"Teacher module", prof_module_placeholder_text:"This module's content is being prepared: it will soon be automatically linked to the course your teacher uploaded.", brand_sub:"Pick a subject to get started",
 matiere_brand_sub:"Revision path",
 prof_not_validated:"This account is not approved as a teacher. To access the teacher area, create a teacher account with a valid code.",
@@ -2465,7 +2473,7 @@ let layoutMode = null;       // 'mobile' | 'desktop'
 let langChosen = false;      // true si une préférence de langue a déjà été enregistrée
 let appEntered = false;      // true une fois qu'on a quitté la page d'accueil (landing) pour l'appli
 let currentMatiereId = null;
-let groupOverride = null; // {groupName, hiddenMatieres, hiddenModules, shownGroupMatieres} si l'élève appartient à un groupe
+let groupOverride = null; // {groupName, hiddenMatieres, hiddenModules, shownGroupMatieres} si l'étudiant appartient à un groupe
 let isTeacher = false; // true si l'utilisateur a créé au moins un groupe
 
 async function refreshTeacherStatus(){
@@ -2499,7 +2507,7 @@ function getShownMatieres(){
 }
 function getVisibleMatieres(){
   // Les matières "group" (vrais cours) n'apparaissent jamais pour un utilisateur lambda.
-  // Elles apparaissent soit via un groupe (activées par le prof pour ses élèves),
+  // Elles apparaissent soit via un groupe (activées par le prof pour ses étudiants),
   // soit pour le prof lui-même (créateur d'au moins un groupe), régies par ses propres réglages.
   const publicOnes = MATIERES.filter(m => m.scope !== 'group' && m.scope !== 'prof-module');
   const profOnes = joinedProfModulesAsMatieres();
@@ -2596,7 +2604,8 @@ let currentSession = null;
 let authMode = 'login';
 let profAuthMode = 'login';
 let isProf = false; // true si le compte connecté a le rôle professeur
-let isEtab = false; // true si le compte est un établissement (crée groupes et codes élèves)
+let isAdmin = false; // propriétaire : peut générer les codes d'accès établissement / professeur
+let isEtab = false; // true si le compte est un établissement (crée groupes et codes étudiants)
 let remoteSaveTimer = null;
 
 function collectState(){
@@ -2676,7 +2685,7 @@ function renderAccountUI(){
   syncSidebarProfile();
   applySeatUserUI();
 }
-function openAccount(){ document.getElementById('accountOverlay').classList.add('active'); renderAccountUI(); }
+function openAccount(){ document.getElementById('accountOverlay').classList.add('active'); setAuthMode('login'); renderAccountUI(); }
 function closeAccount(){ document.getElementById('accountOverlay').classList.remove('active'); }
 // Statut prof vérifié côté base (table prof_accounts via la fonction is_prof),
 // et non plus d'après user_metadata.role que l'utilisateur peut écrire lui-même.
@@ -2685,18 +2694,19 @@ let profCheckPromise = Promise.resolve(false);
 function applyProfNav(){
   const navs = document.querySelectorAll('[data-nav="prof"]');
   navs.forEach(el => { el.style.display = (isProf || isEtab) ? '' : 'none'; });
+  document.querySelectorAll('[data-nav="admin"]').forEach(el => { el.style.display = isAdmin ? '' : 'none'; });
 }
 function refreshProfStatus(){
   const uid = currentSession && currentSession.user ? currentSession.user.id : null;
-  if(!uid){ isProf = false; isEtab = false; profCheckUserId = null; applyProfNav(); profCheckPromise = Promise.resolve(false); return profCheckPromise; }
+  if(!uid){ isProf = false; isEtab = false; isAdmin = false; profCheckUserId = null; applyProfNav(); profCheckPromise = Promise.resolve(false); return profCheckPromise; }
   if(profCheckUserId === uid){ applyProfNav(); return profCheckPromise; }
-  profCheckUserId = uid; isProf = false; isEtab = false; applyProfNav();
+  profCheckUserId = uid; isProf = false; isEtab = false; isAdmin = false; applyProfNav();
   profCheckPromise = (async () => {
     try{
-      const [rp, re] = await Promise.all([supabaseClient.rpc('is_prof', { uid }), supabaseClient.rpc('is_etab', { uid })]);
+      const [rp, re, ra] = await Promise.all([supabaseClient.rpc('is_prof', { uid }), supabaseClient.rpc('is_etab', { uid }), supabaseClient.rpc('is_admin')]);
       if(rp.error) throw rp.error;
       if(re.error) throw re.error;
-      if(profCheckUserId === uid){ isProf = rp.data === true; isEtab = re.data === true; applyProfNav(); }
+      if(profCheckUserId === uid){ isProf = rp.data === true; isEtab = re.data === true; isAdmin = ra && ra.data === true; applyProfNav(); }
     }catch(e){
       console.error('Vérification du statut professeur impossible :', e);
       if(profCheckUserId === uid) profCheckUserId = null; // nouvel essai au prochain appel
@@ -2705,10 +2715,12 @@ function refreshProfStatus(){
   })();
   return profCheckPromise;
 }
-async function openProfModal(){
+async function openProfModal(kind){
+  applyProfModalKind(kind);
   document.getElementById('profOverlay').classList.add('active');
   const loggedOut = document.getElementById('profLoggedOut'), loggedIn = document.getElementById('profLoggedIn'), notValidated = document.getElementById('profNotValidated');
   if(currentSession) await refreshProfStatus();
+  applyProfModalKind(kind);
   if(currentSession && (isProf || isEtab)){
     loggedOut.style.display = 'none'; loggedIn.style.display = 'block'; notValidated.style.display = 'none';
     document.getElementById('profEmailDisplay').textContent = currentSession.user.email;
@@ -2804,52 +2816,10 @@ function submitReportProblem(){
 }
 function setAuthMode(mode){
   authMode = mode;
-  const tabs = document.getElementById('authTabs');
-  const normal = document.getElementById('authFormNormal');
-  const forgot = document.getElementById('authFormForgot');
-  if(mode === 'forgot'){
-    tabs.style.display = 'none'; normal.style.display = 'none'; forgot.style.display = 'block';
-    document.getElementById('forgotMsg').textContent = '';
-    return;
-  }
-  tabs.style.display = 'none'; normal.style.display = 'block'; forgot.style.display = 'none';
-  document.getElementById('authTabLogin').classList.toggle('active', mode === 'login');
-  document.getElementById('authTabSignup').classList.toggle('active', mode === 'signup');
-  document.getElementById('authSignupExtra').style.display = mode === 'signup' ? 'block' : 'none';
-  document.getElementById('authSubmitBtn').textContent = mode === 'login' ? t('btn_login') : t('btn_signup');
-  document.getElementById('forgotLink').style.display = mode === 'login' ? 'inline' : 'none';
-  document.getElementById('authMsg').textContent = '';
-}
-async function submitAuth(){
-  const email = document.getElementById('authEmail').value.trim();
-  const password = document.getElementById('authPassword').value;
-  const msg = document.getElementById('authMsg');
-  if(!email || !password){ msg.style.color = 'var(--bad)'; msg.textContent = t('msg_need_email_pw'); return; }
-  msg.style.color = '#6b7280'; msg.textContent = t('msg_wait');
-  try{
-    if(authMode === 'signup'){
-      const prenom = document.getElementById('authPrenom').value.trim();
-      const nom = document.getElementById('authNom').value.trim();
-      const groupCode = document.getElementById('authGroupCode').value.trim().toUpperCase();
-      if(!nom || !prenom){ msg.style.color = 'var(--bad)'; msg.textContent = t('msg_need_nom_prenom'); return; }
-      if(!document.getElementById('authMinorConsent').checked){ msg.style.color = 'var(--bad)'; msg.textContent = t('msg_need_minor_consent'); return; }
-      if(!document.getElementById('authPrivacyConsent').checked){ msg.style.color = 'var(--bad)'; msg.textContent = t('msg_need_privacy_consent'); return; }
-      const { data, error } = await supabaseClient.auth.signUp({
-        email, password,
-        options: { data: { nom, prenom, pendingGroupCode: groupCode || null, consentAt: new Date().toISOString() } }
-      });
-      if(error) throw error;
-      if(data.session){ msg.style.color = 'var(--ok)'; msg.textContent = t('msg_created_connected'); setTimeout(closeAccount, 900); }
-      else { msg.style.color = 'var(--ok)'; msg.textContent = t('msg_created_confirm_email'); }
-    } else {
-      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if(error) throw error;
-      msg.style.color = 'var(--ok)'; msg.textContent = t('msg_connected'); setTimeout(closeAccount, 700);
-    }
-  }catch(e){
-    msg.style.color = 'var(--bad)';
-    msg.textContent = e.message === 'Invalid login credentials' ? t('msg_invalid_creds') : (e.message || t('msg_generic_error'));
-  }
+  document.getElementById('authFormNormal').style.display = mode === 'forgot' ? 'none' : 'block';
+  document.getElementById('authFormForgot').style.display = mode === 'forgot' ? 'block' : 'none';
+  document.getElementById('forgotMsg').textContent = '';
+  const m = document.getElementById('accStudentMsg'); if(m) m.textContent = '';
 }
 async function submitForgotPassword(){
   const email = document.getElementById('forgotEmail').value.trim();
@@ -3347,7 +3317,7 @@ async function retryProfModule(id, isUpd){
 function stopProfModulesPoll(){
   if(profModulesPollTimer){ clearTimeout(profModulesPollTimer); profModulesPollTimer = null; }
 }
-/* ---- Dépôt en deux zones : cours du prof (fait foi) + notes d'élèves (ajouts / précisions) ---- */
+/* ---- Dépôt en deux zones : cours du prof (fait foi) + notes d'étudiants (ajouts / précisions) ---- */
 const ILLUS_BUCKET = 'course-illustrations';
 const ILLUS_MIMES = ['image/png','image/jpeg','image/webp','image/gif','image/svg+xml'];
 const ILLUS_MAX_BYTES = 5 * 1024 * 1024;
@@ -3528,7 +3498,7 @@ async function profSubmitDeposit(){
   if(btn) btn.disabled = false;
 }
 async function launchCourseGeneration(moduleId, profFiles, stuFiles, illusMeta, isUpdate){
-  // Mise à jour d'un cours publié : on n'écrit JAMAIS status/content (les élèves gardent l'ancienne version).
+  // Mise à jour d'un cours publié : on n'écrit JAMAIS status/content (les étudiants gardent l'ancienne version).
   const setFail = async (msg) => {
     if(isUpdate) await supabaseClient.from('prof_module_content').update({ update_status: 'error', update_error: msg }).eq('module_id', moduleId);
     else await supabaseClient.from('prof_module_content').upsert({ module_id: moduleId, status: 'error', error_message: msg });
@@ -3545,11 +3515,11 @@ async function launchCourseGeneration(moduleId, profFiles, stuFiles, illusMeta, 
       refreshProfModulesListIfVisible();
       return;
     }
-    // Notes d'élèves (facultatives) : illisibles / trop courtes = ignorées.
+    // Notes d'étudiants (facultatives) : illisibles / trop courtes = ignorées.
     const studentTexts = [];
     for(const f of (stuFiles || [])){
       const tx = ((await extractTextFromFile(f)) || '').trim();
-      if(tx.length >= 80) studentTexts.push(tx.slice(0, 30000)); else console.warn('Notes d\'élève ignorées (illisibles) :', f.name);
+      if(tx.length >= 80) studentTexts.push(tx.slice(0, 30000)); else console.warn('Notes d\'étudiant ignorées (illisibles) :', f.name);
     }
     if(!isUpdate) await supabaseClient.from('prof_module_content').upsert({ module_id: moduleId, status: 'pending', source_char_count: rawText.length });
     const { error } = await supabaseClient.functions.invoke('generate-course', { body: { moduleId, rawText, studentTexts, illustrations: illusMeta || [] } });
@@ -3999,7 +3969,7 @@ async function profEdPublish(){
 }
 
 
-/* ---- Gestion des chapitres affichés aux élèves (module professeur) ---- */
+/* ---- Gestion des chapitres affichés aux étudiants (module professeur) ---- */
 async function openProfModuleManage(moduleId){
   const view = document.getElementById('view');
   view.classList.add('active');
@@ -4069,42 +4039,107 @@ function userLabel(u){
 function normSeatCode(s){ return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
 function fmtSeatCode(c){ c = String(c || ''); return c.length === 8 ? c.slice(0, 4) + '-' + c.slice(4) : c; }
 
-async function studentCodeLogin(raw){
-  const code = normSeatCode(raw);
-  if(code.length !== 8) return { ok:false, msg:t('stu_err_invalid') };
+async function studentCall(payload){
   try{
     const r = await fetch(SUPABASE_URL + '/functions/v1/student-login', {
       method:'POST',
       headers:{ 'Content-Type':'application/json', 'apikey':SUPABASE_ANON_KEY, 'Authorization':'Bearer ' + SUPABASE_ANON_KEY },
-      body: JSON.stringify({ code })
+      body: JSON.stringify(payload)
     });
     const j = await r.json().catch(() => ({}));
-    if(!r.ok){
-      return { ok:false, msg: j.error === 'rate_limited' ? t('stu_err_rate') : (j.error === 'invalid_code' ? t('stu_err_invalid') : t('stu_err_server')) };
-    }
-    const { error } = await supabaseClient.auth.setSession({ access_token:j.access_token, refresh_token:j.refresh_token });
-    if(error) throw error;
-    return { ok:true };
-  }catch(e){
-    console.error('Connexion par code impossible :', e);
-    return { ok:false, msg:t('stu_err_server') };
-  }
+    return { ok:r.ok, status:r.status, j };
+  }catch(e){ console.error('Connexion étudiant impossible :', e); return { ok:false, status:0, j:{ error:'network' } }; }
+}
+function stuErrMsg(code){
+  return ({ rate_limited:'stu_err_rate', invalid_code:'stu_err_invalid', invalid_credentials:'stu_err_pwd', weak_password:'stu_err_weak',
+    name_required:'stu_err_name', already_claimed:'stu_err_claimed' })[code] ? t(({ rate_limited:'stu_err_rate', invalid_code:'stu_err_invalid',
+    invalid_credentials:'stu_err_pwd', weak_password:'stu_err_weak', name_required:'stu_err_name', already_claimed:'stu_err_claimed' })[code]) : t('stu_err_server');
 }
 let studentLoginBusy = false;
-async function submitStudentCode(){
+let stuFlow = { code:'', claimed:false };
+// Étape 1 : le code existe-t-il, est-il déjà activé ? (src = 'landing' | 'account')
+async function submitStudentCode(src){
   if(studentLoginBusy) return;
-  const input = document.getElementById('landingStudentCode');
-  const msg = document.getElementById('landingCodeMsg');
-  const btn = document.getElementById('landingStudentBtn');
-  if(!normSeatCode(input.value)){ msg.style.color = 'var(--bad)'; msg.textContent = t('stu_err_empty'); return; }
-  studentLoginBusy = true; if(btn) btn.disabled = true;
+  const acc = src === 'account';
+  const input = document.getElementById(acc ? 'accStudentCode' : 'landingStudentCode');
+  const msg = document.getElementById(acc ? 'accStudentMsg' : 'landingCodeMsg');
+  const code = normSeatCode(input.value);
+  if(!code){ msg.style.color = 'var(--bad)'; msg.textContent = t('stu_err_empty'); return; }
+  if(code.length !== 8){ msg.style.color = 'var(--bad)'; msg.textContent = t('stu_err_invalid'); return; }
+  studentLoginBusy = true;
   msg.style.color = '#9aa0ad'; msg.textContent = t('msg_checking');
-  const res = await studentCodeLogin(input.value);
-  studentLoginBusy = false; if(btn) btn.disabled = false;
-  if(res.ok){ input.value = ''; msg.style.color = 'var(--ok)'; msg.textContent = t('stu_welcome'); }
-  else { msg.style.color = 'var(--bad)'; msg.textContent = res.msg; }
+  const res = await studentCall({ action:'check', code });
+  studentLoginBusy = false;
+  if(!res.ok){ msg.style.color = 'var(--bad)'; msg.textContent = stuErrMsg(res.j && res.j.error); return; }
+  msg.textContent = '';
+  if(acc) closeAccount();
+  openStuFlow(code, !!res.j.claimed);
 }
-// Un poste partagé ne doit jamais mélanger la progression de deux élèves.
+function openStuFlow(code, claimed){
+  stuFlow = { code, claimed };
+  let ov = document.getElementById('stuOverlay');
+  if(!ov){
+    ov = document.createElement('div'); ov.className = 'overlay'; ov.id = 'stuOverlay';
+    ov.innerHTML = `<div class="modal-box">
+      <button class="close-x" onclick="closeStuFlow()">×</button>
+      <h3 id="stuTitle"></h3>
+      <p style="font-size:.85rem; color:#6b7280; margin:0 0 12px;" id="stuLead"></p>
+      <div id="stuNames">
+        <input type="text" id="stuPrenom" maxlength="40" autocomplete="given-name" data-i18n-ph="ph_prenom" placeholder="Prénom">
+        <input type="text" id="stuNom" maxlength="40" autocomplete="family-name" data-i18n-ph="ph_nom" placeholder="Nom">
+      </div>
+      <input type="password" id="stuPwd" autocomplete="current-password" data-i18n-ph="stu_pwd_ph" placeholder="Mot de passe" onkeydown="if(event.key==='Enter'){event.preventDefault();submitStuFlow();}">
+      <input type="password" id="stuPwd2" autocomplete="new-password" data-i18n-ph="stu_pwd2_ph" placeholder="Confirme le mot de passe" onkeydown="if(event.key==='Enter'){event.preventDefault();submitStuFlow();}">
+      <div class="auth-msg" id="stuMsg"></div>
+      <button class="btn" id="stuSubmit" onclick="submitStuFlow()"></button>
+      <p style="font-size:.78rem; color:#6b7280; margin-top:12px;" id="stuHint"></p>
+    </div>`;
+    document.body.appendChild(ov);
+  }
+  document.getElementById('stuTitle').textContent = t(claimed ? 'stu_login_t' : 'stu_claim_t');
+  document.getElementById('stuLead').textContent = t(claimed ? 'stu_login_lead' : 'stu_claim_lead');
+  document.getElementById('stuNames').style.display = claimed ? 'none' : 'block';
+  document.getElementById('stuPwd2').style.display = claimed ? 'none' : 'block';
+  document.getElementById('stuPwd').autocomplete = claimed ? 'current-password' : 'new-password';
+  document.getElementById('stuSubmit').textContent = t(claimed ? 'stu_login_btn' : 'stu_claim_btn');
+  document.getElementById('stuHint').textContent = t(claimed ? 'stu_forgot_hint' : 'stu_claim_hint');
+  ['stuPrenom','stuNom','stuPwd','stuPwd2'].forEach(id => { const el = document.getElementById(id); el.value = ''; el.placeholder = t(el.getAttribute('data-i18n-ph')); });
+  document.getElementById('stuMsg').textContent = '';
+  ov.classList.add('active');
+  setTimeout(() => { const f = document.getElementById(claimed ? 'stuPwd' : 'stuPrenom'); if(f) f.focus(); }, 50);
+}
+function closeStuFlow(){ const ov = document.getElementById('stuOverlay'); if(ov) ov.classList.remove('active'); }
+async function submitStuFlow(){
+  if(studentLoginBusy) return;
+  const msg = document.getElementById('stuMsg'), bad = m => { msg.style.color = 'var(--bad)'; msg.textContent = m; };
+  const pwd = document.getElementById('stuPwd').value;
+  const payload = { code:stuFlow.code, password:pwd, action: stuFlow.claimed ? 'login' : 'claim' };
+  if(!pwd) return bad(t('stu_err_pwd'));
+  if(!stuFlow.claimed){
+    payload.prenom = document.getElementById('stuPrenom').value.trim();
+    payload.nom = document.getElementById('stuNom').value.trim();
+    if(!payload.prenom || !payload.nom) return bad(t('stu_err_name'));
+    if(pwd.length < 8) return bad(t('stu_err_weak'));
+    if(pwd !== document.getElementById('stuPwd2').value) return bad(t('stu_err_mismatch'));
+  }
+  studentLoginBusy = true; document.getElementById('stuSubmit').disabled = true;
+  msg.style.color = '#9aa0ad'; msg.textContent = t('msg_checking');
+  const res = await studentCall(payload);
+  let ok = false;
+  if(res.ok){
+    try{
+      const { error } = await supabaseClient.auth.setSession({ access_token:res.j.access_token, refresh_token:res.j.refresh_token });
+      if(error) throw error; ok = true;
+    }catch(e){ console.error(e); }
+  }
+  studentLoginBusy = false; document.getElementById('stuSubmit').disabled = false;
+  if(ok){ msg.style.color = 'var(--ok)'; msg.textContent = t('stu_welcome'); setTimeout(closeStuFlow, 500); return; }
+  const err = res.j && res.j.error;
+  if(err === 'already_claimed'){ openStuFlow(stuFlow.code, true); document.getElementById('stuMsg').style.color = 'var(--bad)'; document.getElementById('stuMsg').textContent = t('stu_err_claimed'); return; }
+  if(err === 'claim_required'){ openStuFlow(stuFlow.code, false); return; }
+  bad(stuErrMsg(err));
+}
+// Un poste partagé ne doit jamais mélanger la progression de deux étudiants.
 function resetLocalProgress(){
   hiddenMatieres = []; hiddenModules = {}; customModules = {}; validatedChapters = {};
   storageSet('hidden-matieres', '[]'); storageSet('hidden-modules-v2', '{}');
@@ -4122,7 +4157,7 @@ function applySeatUserUI(){
   document.body.classList.toggle('seat-user', !!(currentSession && isSeatUser(currentSession.user)));
 }
 
-/* ---- Établissement : groupes d'élèves et codes ---- */
+/* ---- Établissement : groupes d'étudiants et codes ---- */
 const clsState = { allClasses:[], otherGroups:{}, classId:null, className:'', classCode:'', rows:[], filter:'', sel:new Set(), newIds:new Set(), flash:null };
 
 function clsErr(e){
@@ -4157,7 +4192,8 @@ function clsParseNames(txt){
 
 async function renderEtabBody(){
   const body = document.getElementById('viewBody');
-  body.innerHTML = '<div class="panel" id="etabGroupsBox">…</div>';
+  body.innerHTML = '<div class="panel" id="etabGroupsBox">…</div><div class="panel" style="margin-top:16px;" id="etabChatBox">…</div>';
+  renderEtabChatPanel();
   await renderEtabGroupsPanel();
 }
 async function renderEtabGroupsPanel(){
@@ -4355,7 +4391,7 @@ function clsFillRows(){
   tb.innerHTML = rows.map(r => `
     <tr class="${clsState.newIds.has(r.seat_id) ? 'cls-new-row' : ''}">
       <td><input type="checkbox" ${clsState.sel.has(r.seat_id) ? 'checked' : ''} onchange="clsToggleOne('${r.seat_id}', this.checked)"></td>
-      <td><a href="#" onclick="event.preventDefault(); clsRenameSeat('${r.seat_id}')" title="${escapeHtml(t('cls_rename'))}" style="color:inherit;">${escapeHtml(r.label)}</a></td>
+      <td><a href="#" onclick="event.preventDefault(); clsRenameSeat('${r.seat_id}')" title="${escapeHtml(t('cls_rename'))}" style="color:inherit;">${escapeHtml(r.label)}</a> <button type="button" class="cls-reset" title="${escapeHtml(t('cls_reset_pwd'))}" onclick="clsResetSeat('${r.seat_id}')">↺</button></td>
       <td><span class="cls-code" title="${escapeHtml(t('cls_copy'))}" onclick="clsCopyCode('${r.seat_id}')">${escapeHtml(fmtSeatCode(r.code))}</span></td>
       <td style="white-space:normal; max-width:220px; font-size:.78rem; color:#4b5563;">${(clsState.otherGroups[r.seat_id] || []).map(escapeHtml).join(', ') || '—'}</td>
       <td>${clsFmtDate(r.last_login_at)}</td>
@@ -4517,7 +4553,16 @@ function exportSeatsCsv(){
 }
 
 
-/* ---- Professeur : inscrire des groupes d'élèves à un cours ---- */
+async function clsResetSeat(id){
+  if(!confirm(t('cls_reset_confirm'))) return;
+  try{
+    const { error } = await supabaseClient.rpc('student_reset_seat', { p_id:id });
+    if(error) throw error;
+    clsFlash('ok', t('cls_reset_done'));
+  }catch(e){ clsFlash('err', clsErr(e)); }
+}
+
+/* ---- Professeur : inscrire des groupes d'étudiants à un cours ---- */
 const enrState = { moduleId:null };
 async function renderProfEnrollPanel(modules){
   const box = document.getElementById('profEnrollBox');
@@ -4556,11 +4601,20 @@ async function enrLoadList(){
     const { data, error } = await supabaseClient.rpc('module_enrollments', { p_module: mid });
     if(error) throw error;
     if(mid !== enrState.moduleId) return;
-    el.innerHTML = (data || []).length ? data.map(r => `
+    const seatsRes = await supabaseClient.rpc('module_enrolled_seats', { p_module: mid });
+    if(seatsRes.error) throw seatsRes.error;
+    if(mid !== enrState.moduleId) return;
+    const seatsHtml = (seatsRes.data || []).length ? `<div style="margin-top:10px; font-size:.82rem; color:#4b5563;"><strong>${t('enr_seats_t')}</strong></div>` + seatsRes.data.map(s => `
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:8px 0; border-top:1px solid #e7e9f5;">
+        <span><strong>${escapeHtml(s.label || '—')}</strong> <span style="color:#6b7280; font-size:.82rem;">— ${s.joined ? t('enr_seat_joined') : t('enr_seat_waiting')}</span></span>
+        <button type="button" class="btn cls-ghost" style="padding:6px 12px; font-size:.8rem; color:var(--bad);" onclick="enrRemoveSeat('${s.seat_id}')">${t('enr_remove')}</button>
+      </div>`).join('') : '';
+    const groupsHtml = (data || []).length ? data.map(r => `
       <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:8px 0; border-top:1px solid #e7e9f5;">
         <span><strong>${escapeHtml(r.name)}</strong> <span style="color:#6b7280; font-size:.82rem;">— ${t('enr_row', { n:r.n_students, j:r.n_joined })}</span></span>
         <button type="button" class="btn cls-ghost" style="padding:6px 12px; font-size:.8rem; color:var(--bad);" onclick="enrRemove('${r.class_id}')">${t('enr_remove')}</button>
-      </div>`).join('') : `<p style="font-size:.85rem; color:#6b7280;">${t('enr_none')}</p>`;
+      </div>`).join('') : ((seatsRes.data || []).length ? '' : `<p style="font-size:.85rem; color:#6b7280;">${t('enr_none')}</p>`);
+    el.innerHTML = groupsHtml + seatsHtml;
   }catch(e){ el.innerHTML = `<p style="font-size:.85rem; color:var(--bad);">${escapeHtml(clsErr(e))}</p>`; }
 }
 async function enrAdd(){
@@ -4568,11 +4622,30 @@ async function enrAdd(){
   const code = normSeatCode(input.value);
   if(!code){ enrFlash('err', t('enr_err_empty')); return; }
   try{
-    const { data, error } = await supabaseClient.rpc('module_enroll_class', { p_module: enrState.moduleId, p_code: code });
+    // 6 caractères = code de groupe ; 8 caractères = code d'un étudiant
+    if(code.length !== 6 && code.length !== 8){ enrFlash('err', t('enr_err_format')); return; }
+    if(code.length === 8){
+      const { data, error } = await supabaseClient.rpc('module_enroll_seat', { p_module: enrState.moduleId, p_code: code });
+      if(error) throw error;
+      const r = data && data[0];
+      input.value = '';
+      enrFlash('ok', t('enr_seat_done', { name: r ? (r.label || '') : '' }));
+    } else {
+      const { data, error } = await supabaseClient.rpc('module_enroll_class', { p_module: enrState.moduleId, p_code: code });
+      if(error) throw error;
+      const r = data && data[0];
+      input.value = '';
+      enrFlash('ok', t('enr_done', { name: r ? r.name : '', n: r ? r.n_students : 0 }));
+    }
+    enrLoadList();
+  }catch(e){ enrFlash('err', clsErr(e)); }
+}
+async function enrRemoveSeat(seatId){
+  if(!confirm(t('enr_remove_seat_confirm'))) return;
+  try{
+    const { error } = await supabaseClient.rpc('module_unenroll_seat', { p_module: enrState.moduleId, p_seat: seatId });
     if(error) throw error;
-    const r = data && data[0];
-    input.value = '';
-    enrFlash('ok', t('enr_done', { name: r ? r.name : '', n: r ? r.n_students : 0 }));
+    enrFlash('ok', t('enr_removed'));
     enrLoadList();
   }catch(e){ enrFlash('err', clsErr(e)); }
 }
@@ -4586,7 +4659,348 @@ async function enrRemove(classId){
   }catch(e){ enrFlash('err', clsErr(e)); }
 }
 
-function openAdminPage(){
+
+/* ---- Administration (propriétaire) : créer les codes d'accès établissement / professeur ---- */
+
+async function openOwnerConsole(){
+  if(!currentSession){ openProfModal(); return; }
+  document.getElementById('matiereHome').style.display = 'none';
+  document.getElementById('generalHome').style.display = 'none';
+  document.body.classList.remove('home-fit');
+  const view = document.getElementById('view');
+  view.classList.add('active');
+  view.style.removeProperty('--m-color');
+  document.getElementById('viewBack').textContent = t('back_to_home');
+  document.getElementById('viewBack').onclick = goGeneral;
+  document.getElementById('viewHeader').innerHTML = `<h2>${t('adm_title')}</h2>`;
+  document.getElementById('viewBody').innerHTML = `
+    <div class="panel">
+      <h4 style="margin-top:0;">${t('adm_new_t')}</h4>
+      <p style="font-size:.85rem; color:#6b7280;">${t('adm_new_help')}</p>
+      <div class="cls-toolbar">
+        <select class="ed-in" id="admKind" style="flex:0 1 190px; width:auto;">
+          <option value="etab">${t('adm_kind_etab')}</option>
+          <option value="prof">${t('adm_kind_prof')}</option>
+        </select>
+        <input type="number" class="ed-in" id="admN" min="1" max="200" value="1" style="flex:0 0 80px; min-width:60px;" title="${escapeHtml(t('adm_n'))}">
+        <input type="text" class="ed-in" id="admLabel" maxlength="80" placeholder="${escapeHtml(t('adm_label_ph'))}">
+        <input type="number" class="ed-in" id="admDays" min="1" max="365" value="30" style="flex:0 0 90px; min-width:70px;" title="${escapeHtml(t('adm_days'))}">
+        <button type="button" class="btn" onclick="admCreate()">${t('adm_create')}</button>
+      </div>
+      <div class="auth-msg" id="admMsg"></div>
+      <div id="admResult"></div>
+    </div>
+    <div class="panel" style="margin-top:16px;">
+      <h4 style="margin-top:0;">${t('adm_codes_t')}</h4>
+      <div class="cls-tablewrap"><table class="cls-table"><thead><tr>
+        <th>${t('cls_col_code')}</th><th>${t('adm_col_type')}</th><th>${t('adm_col_label')}</th><th>${t('adm_col_status')}</th><th></th>
+      </tr></thead><tbody id="admCodes"><tr><td colspan="5">…</td></tr></tbody></table></div>
+    </div>
+    <div class="panel" style="margin-top:16px;">
+      <h4 style="margin-top:0;">${t('adm_accounts_t')}</h4>
+      <div class="cls-tablewrap"><table class="cls-table"><thead><tr>
+        <th>Email</th><th>${t('adm_col_type')}</th><th>${t('adm_col_modules')}</th><th>${t('adm_col_groups')}</th><th>${t('adm_col_students')}</th>
+      </tr></thead><tbody id="admAccounts"><tr><td colspan="5">…</td></tr></tbody></table></div>
+    </div>`;
+  window.scrollTo({ top:0, behavior:'smooth' });
+  admReload();
+}
+function admStatus(c){
+  if(c.revoked_at) return t('adm_st_revoked');
+  if(c.used_by_email) return t('adm_st_used', { email: escapeHtml(c.used_by_email) });
+  if(c.expires_at && new Date(c.expires_at) < new Date()) return t('adm_st_expired');
+  return t('adm_st_free');
+}
+async function admReload(){
+  try{
+    const [codes, accs] = await Promise.all([supabaseClient.rpc('admin_list_codes'), supabaseClient.rpc('admin_list_accounts')]);
+    if(codes.error) throw codes.error;
+    if(accs.error) throw accs.error;
+    document.getElementById('admCodes').innerHTML = (codes.data || []).map(c => `
+      <tr><td><span class="cls-code" onclick="admCopy('${escapeHtml(c.code)}')" title="${escapeHtml(t('cls_copy'))}">${escapeHtml(c.code)}</span></td>
+      <td>${c.kind === 'etab' ? t('adm_kind_etab') : t('adm_kind_prof')}</td><td>${escapeHtml(c.label || '')}</td><td>${admStatus(c)}</td>
+      <td>${(!c.used_by_email && !c.revoked_at) ? `<button type="button" class="btn cls-ghost" style="padding:4px 10px; font-size:.75rem;" onclick="admRevoke('${c.id}')">${t('adm_revoke')}</button>` : ''}</td></tr>`).join('') || `<tr><td colspan="5">—</td></tr>`;
+    document.getElementById('admAccounts').innerHTML = (accs.data || []).map(a => `
+      <tr><td>${escapeHtml(a.email)}</td><td>${a.kind === 'etab' ? t('adm_kind_etab') : t('adm_kind_prof')}</td>
+      <td>${a.n_modules}</td><td>${a.n_groups}</td><td>${a.n_students}</td></tr>`).join('') || `<tr><td colspan="5">—</td></tr>`;
+  }catch(e){
+    const m = document.getElementById('admMsg');
+    if(m){ m.style.color = 'var(--bad)'; m.textContent = (e && e.message) || t('msg_generic_error'); }
+  }
+}
+async function admCreate(){
+  const msg = document.getElementById('admMsg');
+  const kind = document.getElementById('admKind').value;
+  const n = parseInt(document.getElementById('admN').value, 10) || 1;
+  const days = parseInt(document.getElementById('admDays').value, 10);
+  msg.style.color = '#6b7280'; msg.textContent = t('msg_wait');
+  try{
+    const { data, error } = await supabaseClient.rpc('admin_new_codes', {
+      p_kind: kind, p_n: n, p_label: document.getElementById('admLabel').value.trim() || null, p_days: days >= 1 ? days : null });
+    if(error) throw error;
+    const list = (data || []).map(r => r.code);
+    msg.textContent = '';
+    document.getElementById('admResult').innerHTML = `<div class="cls-flash ok" style="margin-top:12px;">${t('adm_created', { n:list.length })}<br>
+      <strong style="font-family:monospace; font-size:1.05rem; user-select:all;">${list.map(escapeHtml).join('<br>')}</strong></div>`;
+    admReload();
+  }catch(e){ msg.style.color = 'var(--bad)'; msg.textContent = (e && e.message) || t('msg_generic_error'); }
+}
+async function admRevoke(id){
+  if(!confirm(t('adm_revoke_confirm'))) return;
+  try{
+    const { error } = await supabaseClient.rpc('admin_revoke_code', { p_id:id });
+    if(error) throw error;
+    admReload();
+  }catch(e){ const m = document.getElementById('admMsg'); m.style.color = 'var(--bad)'; m.textContent = (e && e.message) || t('msg_generic_error'); }
+}
+async function admCopy(code){ try{ await navigator.clipboard.writeText(code); }catch(e){} }
+
+/* ---- Fenêtre « Professeur » / « Établissement » : mêmes écrans, textes adaptés ---- */
+let profModalKind = 'prof';
+function applyProfModalKind(kind){
+  if(kind === 'etab' || kind === 'prof') profModalKind = kind;
+  else if(isEtab) profModalKind = 'etab';
+  else if(isProf) profModalKind = 'prof';
+  const e = profModalKind === 'etab';
+  const set = (id, attr, key) => {
+    const el = document.getElementById(id); if(!el) return;
+    el.setAttribute(attr, key);
+    if(attr === 'data-i18n') el.textContent = t(key); else el.placeholder = t(key);
+  };
+  set('profModalTitle', 'data-i18n', e ? 'etab_modal_title' : 'prof_modal_title');
+  set('profCode', 'data-i18n-ph', e ? 'ph_etab_code' : 'ph_prof_code');
+  set('profCodeHelp', 'data-i18n', e ? 'etab_code_help' : 'prof_code_help');
+  set('profNote', 'data-i18n', e ? 'etab_note' : 'prof_note');
+  set('profGotoBtn', 'data-i18n', e ? 'etab_goto_page' : 'prof_goto_page');
+}
+
+/* ---- Groupes de révision + chat (étudiants) ---- */
+let studyChat = null;
+function studyErr(e){
+  const m = (e && e.message) || '';
+  const map = { CHAT_DISABLED:'study_err_disabled', ALREADY_HAS_GROUP:'study_err_has_group', NAME_REQUIRED:'study_err_name', GROUP_NOT_FOUND:'study_err_notfound',
+    GROUP_FULL:'study_err_full', TOO_MANY_GROUPS:'study_err_toomany', REMOVED:'study_err_removed', RATE_LIMITED:'study_err_rate', NOT_MEMBER:'study_err_member' };
+  for(const k in map) if(m.indexOf(k) >= 0) return t(map[k]);
+  return m || t('msg_generic_error');
+}
+function studyStop(){
+  if(studyChat){
+    if(studyChat.poll) clearInterval(studyChat.poll);
+    if(studyChat.channel){ try{ supabaseClient.removeChannel(studyChat.channel); }catch(e){} }
+    studyChat = null;
+  }
+}
+function studyShell(title, html){
+  studyStop();
+  document.getElementById('matiereHome').style.display = 'none';
+  document.getElementById('generalHome').style.display = 'none';
+  document.body.classList.remove('home-fit');
+  const view = document.getElementById('view');
+  view.classList.add('active');
+  view.style.removeProperty('--m-color');
+  document.getElementById('viewBack').textContent = t('back_to_home');
+  document.getElementById('viewBack').onclick = () => { studyStop(); goGeneral(); };
+  document.getElementById('viewHeader').innerHTML = `<h2>${escapeHtml(title)}</h2>`;
+  document.getElementById('viewBody').innerHTML = html;
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+async function openStudyGroups(){
+  if(!currentSession){ openAccount(); return; }
+  studyShell(t('study_title'), '<div class="panel">…</div>');
+  let groups = [];
+  try{
+    const { data, error } = await supabaseClient.rpc('study_my_groups');
+    if(error) throw error;
+    groups = data || [];
+  }catch(e){ document.getElementById('viewBody').innerHTML = `<div class="panel"><div class="cls-flash err" style="display:block;">${escapeHtml(studyErr(e))}</div></div>`; return; }
+  const mine = groups.find(g => g.is_creator);
+  document.getElementById('viewBody').innerHTML = `
+    <div class="panel">
+      <h4 style="margin-top:0;">${t('study_join_t')}</h4>
+      <p style="font-size:.85rem; color:#6b7280;">${t('study_join_help')}</p>
+      <div class="cls-toolbar">
+        <input type="text" class="ed-in" id="studyJoinCode" maxlength="10" autocomplete="off" autocapitalize="characters" placeholder="${escapeHtml(t('study_code_ph'))}" onkeydown="if(event.key==='Enter'){event.preventDefault();studyJoin();}">
+        <button type="button" class="btn" onclick="studyJoin()">${t('study_join_btn')}</button>
+      </div>
+      <div class="auth-msg" id="studyJoinMsg"></div>
+    </div>
+    <div class="panel" style="margin-top:16px;">
+      <h4 style="margin-top:0;">${t('study_mine_t')}</h4>
+      ${mine ? `<p style="font-size:.85rem; color:#6b7280;">${t('study_mine_have')}</p>` : `
+        <p style="font-size:.85rem; color:#6b7280;">${t('study_create_help')}</p>
+        <div class="cls-toolbar">
+          <input type="text" class="ed-in" id="studyNewName" maxlength="40" placeholder="${escapeHtml(t('study_name_ph'))}" onkeydown="if(event.key==='Enter'){event.preventDefault();studyCreate();}">
+          <button type="button" class="btn" onclick="studyCreate()">${t('study_create_btn')}</button>
+        </div>
+        <div class="auth-msg" id="studyCreateMsg"></div>`}
+    </div>
+    <div class="panel" style="margin-top:16px;">
+      <h4 style="margin-top:0;">${t('study_list_t')}</h4>
+      ${groups.length ? groups.map(g => `
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:10px 0; border-top:1px solid #e7e9f5;">
+          <span><strong>${escapeHtml(g.name)}</strong> <span style="color:#6b7280; font-size:.82rem;">— ${t('study_n_members', { n:g.n_members })}</span>
+            <span class="cls-code" style="margin-left:8px;" title="${escapeHtml(t('cls_copy'))}" onclick="admCopy('${escapeHtml(g.code)}')">${escapeHtml(g.code)}</span>${g.is_creator ? ` <span style="font-size:.75rem; color:#6b7280;">(${t('study_creator')})</span>` : ''}</span>
+          <button type="button" class="btn secondary" style="padding:6px 14px; font-size:.8rem;" onclick="openStudyChat('${g.id}')">${t('study_open_chat')}</button>
+        </div>`).join('') : `<p style="font-size:.85rem;">${t('study_none')}</p>`}
+    </div>`;
+}
+async function studyJoin(){
+  const msg = document.getElementById('studyJoinMsg'), code = document.getElementById('studyJoinCode').value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  if(!code){ msg.style.color = 'var(--bad)'; msg.textContent = t('study_err_code'); return; }
+  msg.style.color = '#6b7280'; msg.textContent = t('msg_wait');
+  try{
+    const { data, error } = await supabaseClient.rpc('study_join_group', { p_code:code });
+    if(error) throw error;
+    openStudyChat(data[0].group_id);
+  }catch(e){ msg.style.color = 'var(--bad)'; msg.textContent = studyErr(e); }
+}
+async function studyCreate(){
+  const msg = document.getElementById('studyCreateMsg'), name = document.getElementById('studyNewName').value.trim();
+  if(name.length < 2){ msg.style.color = 'var(--bad)'; msg.textContent = t('study_err_name'); return; }
+  msg.style.color = '#6b7280'; msg.textContent = t('msg_wait');
+  try{
+    const { data, error } = await supabaseClient.rpc('study_create_group', { p_name:name });
+    if(error) throw error;
+    openStudyChat(data[0].group_id);
+  }catch(e){ msg.style.color = 'var(--bad)'; msg.textContent = studyErr(e); }
+}
+async function openStudyChat(gid){
+  let g = null;
+  try{
+    const { data, error } = await supabaseClient.rpc('study_my_groups');
+    if(error) throw error;
+    g = (data || []).find(x => x.id === gid);
+  }catch(e){ g = null; }
+  if(!g){ openStudyGroups(); return; }
+  studyShell(g.name, `
+    <div class="panel study-panel">
+      <div class="study-bar">
+        <span class="cls-code" title="${escapeHtml(t('cls_copy'))}" onclick="admCopy('${escapeHtml(g.code)}')">${escapeHtml(g.code)}</span>
+        <button type="button" class="btn cls-ghost" style="padding:5px 12px; font-size:.78rem;" onclick="studyToggleMembers()">${t('study_members')}</button>
+        <button type="button" class="btn cls-ghost" style="padding:5px 12px; font-size:.78rem;" onclick="openStudyGroups()">${t('study_all_groups')}</button>
+        <button type="button" class="btn cls-ghost" style="padding:5px 12px; font-size:.78rem;" onclick="studyLeave()">${g.is_creator ? t('study_close') : t('study_leave')}</button>
+      </div>
+      <div id="studyMembers" style="display:none;"></div>
+      <div class="study-msgs" id="studyMsgs" aria-live="polite"></div>
+      <div class="study-send">
+        <input type="text" class="ed-in" id="studyInput" maxlength="500" autocomplete="off" placeholder="${escapeHtml(t('study_msg_ph'))}" onkeydown="if(event.key==='Enter'){event.preventDefault();studySend();}">
+        <button type="button" class="btn" onclick="studySend()">${t('study_send')}</button>
+      </div>
+      <div class="auth-msg" id="studyChatMsg"></div>
+      <p style="font-size:.74rem; color:#6b7280; margin:8px 0 0;">${t('study_rules')}</p>
+    </div>`);
+  studyChat = { gid, isCreator:!!g.is_creator, msgs:[], flagged:{}, me:currentSession.user.id, channel:null, poll:null };
+  await studyLoad();
+  const ch = supabaseClient.channel('study-' + gid);
+  ch.on('postgres_changes', { event:'INSERT', schema:'public', table:'study_messages', filter:'group_id=eq.' + gid }, () => studyLoad());
+  ch.subscribe();
+  studyChat.channel = ch;
+  studyChat.poll = setInterval(() => { if(!document.getElementById('studyMsgs')) studyStop(); else studyLoad(); }, 15000);
+}
+async function studyLoad(){
+  const st = studyChat; if(!st) return;
+  try{
+    const { data, error } = await supabaseClient.from('study_messages').select('id,user_id,display_name,body,created_at')
+      .eq('group_id', st.gid).order('created_at', { ascending:false }).limit(200);
+    if(error) throw error;
+    if(studyChat !== st) return;
+    st.msgs = (data || []).slice().reverse();
+    if(st.isCreator){
+      const f = await supabaseClient.rpc('study_flagged', { p_group:st.gid });
+      st.flagged = {}; (f.data || []).forEach(r => { st.flagged[r.message_id] = r.n; });
+    }
+    studyRender();
+  }catch(e){ const m = document.getElementById('studyChatMsg'); if(m){ m.style.color = 'var(--bad)'; m.textContent = studyErr(e); } }
+}
+function studyRender(){
+  const st = studyChat, box = document.getElementById('studyMsgs'); if(!st || !box) return;
+  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+  box.innerHTML = st.msgs.length ? st.msgs.map(m => {
+    const mine = m.user_id === st.me;
+    const tm = new Date(m.created_at).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    return `<div class="study-msg ${mine ? 'mine' : ''}">
+      <div class="study-meta"><strong>${escapeHtml(m.display_name)}</strong> · ${tm}${st.flagged[m.id] ? ` · <span style="color:var(--bad);">⚑ ${st.flagged[m.id]}</span>` : ''}
+        ${!mine ? `<button type="button" class="study-act" title="${escapeHtml(t('study_report'))}" onclick="studyReport(${m.id})">⚑</button>` : ''}
+        ${(mine || st.isCreator) ? `<button type="button" class="study-act" title="${escapeHtml(t('study_hide'))}" onclick="studyHide(${m.id})">🗑</button>` : ''}</div>
+      <div class="study-body">${escapeHtml(m.body)}</div></div>`;
+  }).join('') : `<p style="color:#6b7280; font-size:.85rem; text-align:center; margin:20px 0;">${t('study_empty')}</p>`;
+  if(atBottom || !st.shown){ box.scrollTop = box.scrollHeight; st.shown = true; }
+}
+async function studySend(){
+  const st = studyChat, inp = document.getElementById('studyInput'), msg = document.getElementById('studyChatMsg');
+  if(!st || !inp) return;
+  const body = inp.value.trim(); if(!body) return;
+  inp.value = ''; msg.textContent = '';
+  try{
+    const { error } = await supabaseClient.rpc('study_send', { p_group:st.gid, p_body:body });
+    if(error) throw error;
+    studyLoad();
+  }catch(e){ inp.value = body; msg.style.color = 'var(--bad)'; msg.textContent = studyErr(e); }
+}
+async function studyReport(id){
+  if(!confirm(t('study_report_confirm'))) return;
+  const msg = document.getElementById('studyChatMsg');
+  try{
+    const { error } = await supabaseClient.rpc('study_report', { p_message:id });
+    if(error) throw error;
+    msg.style.color = 'var(--ok)'; msg.textContent = t('study_reported');
+  }catch(e){ msg.style.color = 'var(--bad)'; msg.textContent = studyErr(e); }
+}
+async function studyHide(id){
+  if(!confirm(t('study_hide_confirm'))) return;
+  try{
+    const { error } = await supabaseClient.rpc('study_hide_message', { p_message:id });
+    if(error) throw error;
+    studyLoad();
+  }catch(e){ const m = document.getElementById('studyChatMsg'); m.style.color = 'var(--bad)'; m.textContent = studyErr(e); }
+}
+async function studyToggleMembers(){
+  const st = studyChat, box = document.getElementById('studyMembers'); if(!st || !box) return;
+  if(box.style.display === 'block'){ box.style.display = 'none'; return; }
+  try{
+    const { data, error } = await supabaseClient.rpc('study_members', { p_group:st.gid });
+    if(error) throw error;
+    box.innerHTML = (data || []).map(m => `<span class="study-chip">${escapeHtml(m.display_name)}${m.is_creator ? ' ★' : ''}${(st.isCreator && !m.is_creator) ? ` <button type="button" class="study-act" title="${escapeHtml(t('study_remove'))}" onclick="studyRemove('${m.user_id}')">✕</button>` : ''}</span>`).join('');
+    box.style.display = 'block';
+  }catch(e){ const m = document.getElementById('studyChatMsg'); m.style.color = 'var(--bad)'; m.textContent = studyErr(e); }
+}
+async function studyRemove(uid){
+  if(!confirm(t('study_remove_confirm'))) return;
+  try{
+    const { error } = await supabaseClient.rpc('study_remove_member', { p_group:studyChat.gid, p_user:uid });
+    if(error) throw error;
+    document.getElementById('studyMembers').style.display = 'none'; studyToggleMembers();
+  }catch(e){ const m = document.getElementById('studyChatMsg'); m.style.color = 'var(--bad)'; m.textContent = studyErr(e); }
+}
+async function studyLeave(){
+  const st = studyChat; if(!st) return;
+  if(!confirm(t(st.isCreator ? 'study_close_confirm' : 'study_leave_confirm'))) return;
+  try{
+    const { error } = await supabaseClient.rpc('study_leave', { p_group:st.gid });
+    if(error) throw error;
+    openStudyGroups();
+  }catch(e){ const m = document.getElementById('studyChatMsg'); m.style.color = 'var(--bad)'; m.textContent = studyErr(e); }
+}
+/* réglage établissement : chat entre étudiants autorisé ou non */
+async function renderEtabChatPanel(){
+  const box = document.getElementById('etabChatBox'); if(!box) return;
+  let on = true;
+  try{ const { data } = await supabaseClient.rpc('etab_get_chat'); on = data !== false; }catch(e){}
+  box.innerHTML = `<h4 style="margin-top:0;">${t('study_etab_t')}</h4>
+    <p style="font-size:.85rem; color:#6b7280;">${t('study_etab_help')}</p>
+    <label class="consent-check"><input type="checkbox" id="etabChatToggle" ${on ? 'checked' : ''} onchange="etabSetChat(this.checked)"><span>${t('study_etab_label')}</span></label>
+    <div class="auth-msg" id="etabChatMsg"></div>`;
+}
+async function etabSetChat(v){
+  const m = document.getElementById('etabChatMsg');
+  try{
+    const { error } = await supabaseClient.rpc('etab_set_chat', { p_enabled:v });
+    if(error) throw error;
+    m.style.color = 'var(--ok)'; m.textContent = t(v ? 'study_etab_on' : 'study_etab_off');
+  }catch(e){ m.style.color = 'var(--bad)'; m.textContent = (e && e.message) || t('msg_generic_error'); }
+}
+function openAdminPage(){ return openStudyGroups(); }
+function openAdminPageLegacy(){
   if(!currentSession){ openAccount(); return; }
   document.getElementById('matiereHome').style.display = 'none';
   document.getElementById('generalHome').style.display = 'none';
@@ -4810,7 +5224,7 @@ async function consumePendingGroupJoin(){
 }
 
 /* ==========================================================
-   MODULES PROFESSEUR REJOINTS PAR CODE (élève)
+   MODULES PROFESSEUR REJOINTS PAR CODE (étudiant)
 ========================================================== */
 let joinedProfModules = []; // [{id,title,code,course_name,prof_nom,prof_prenom,color}]
 let pendingModuleCode = null; // code saisi avant connexion, à consommer après le login
@@ -5198,6 +5612,7 @@ function navGo(section){
   else if(section === 'dashboard') openDashboard();
   else if(section === 'groups') openAdminPage();
   else if(section === 'prof') openProfPage();
+  else if(section === 'admin') openOwnerConsole();
   else if(section === 'settings') openSettings();
 }
 function syncSidebarProfile(){

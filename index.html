@@ -3595,6 +3595,7 @@ async function profSubmitDeposit(){
   const modules = await loadMyProfModules();
   const list = document.getElementById('profModulesList');
   if(list) list.innerHTML = renderProfModulesList(modules);
+  refreshHomeModules();
   const btn2 = document.getElementById('profCreateBtn'); if(btn2) btn2.disabled = false;
   if(btn) btn.disabled = false;
 }
@@ -5504,7 +5505,19 @@ async function loadJoinedProfModules(){
     if(error) throw error;
     joinedProfModules = (data || []).map(r => r.prof_modules).filter(Boolean);
   }catch(e){ console.error('Chargement des modules rejoints impossible :', e); joinedProfModules = []; }
+  // Cours créés par le prof lui-même, ou cours auxquels des groupes de l'établissement sont inscrits
+  try{
+    const { data: own, error: e2 } = await supabaseClient.rpc('home_modules');
+    if(e2) throw e2;
+    const seen = new Set(joinedProfModules.map(m => m.id));
+    (own || []).forEach(m => { if(!seen.has(m.id)) joinedProfModules.push(m); });
+  }catch(e){ console.error('Cours du compte indisponibles :', e); }
   updateHomeAskCard();
+}
+async function refreshHomeModules(){
+  await loadJoinedProfModules();
+  const g = document.getElementById('generalHome');
+  if(g && g.offsetParent !== null) renderGeneralHome();
 }
 
 async function joinProfModuleByCode(codeRaw){
@@ -5867,8 +5880,9 @@ function renderGeneralHome(){
 function renderHomeOverview(){
   const hiEl = document.getElementById('homeGreetingHi');
   if(currentSession){
-    const label = (currentSession.user.user_metadata && currentSession.user.user_metadata.prenom) || currentSession.user.email.split('@')[0];
-    hiEl.textContent = t('home_greeting_hi', {name: label});
+    const um = currentSession.user.user_metadata || {};
+    const label = um.prenom || um.etab_name || ((currentSession.user.email || '').endsWith('.invalid') ? '' : (currentSession.user.email || '').split('@')[0]);
+    hiEl.textContent = label ? t('home_greeting_hi', {name: label}) : t('home_greeting_hi_guest');
   } else {
     hiEl.textContent = t('home_greeting_hi_guest');
   }

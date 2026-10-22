@@ -825,7 +825,7 @@
   <nav class="sidebar-nav">
     <button class="side-link active" data-nav="home" onclick="navGo('home')"><span class="side-ico">🏠</span><span data-i18n="nav_home">Accueil</span></button>
     <button class="side-link" data-nav="dashboard" onclick="navGo('dashboard')"><span class="side-ico">📊</span><span data-i18n="dashboard_title">Tableau de bord</span></button>
-    <button class="side-link" data-nav="groups" onclick="navGo('groups')"><span class="side-ico">🎓</span><span data-i18n="admin_title">Mes groupes</span></button>
+    <button class="side-link" data-student-only data-nav="groups" onclick="navGo('groups')"><span class="side-ico">🎓</span><span data-i18n="admin_title">Mes groupes</span></button>
     <button class="side-link" data-nav="prof" onclick="navGo('prof')" style="display:none;"><span class="side-ico">🧑‍🏫</span><span data-i18n="prof_page_nav">Page professeur</span></button>
     <button class="side-link" data-nav="admin" onclick="navGo('admin')" style="display:none;"><span class="side-ico">🛠️</span><span data-i18n="adm_title">Administration</span></button>
     <button class="side-link" data-nav="settings" onclick="navGo('settings')"><span class="side-ico">⚙</span><span data-i18n="settings_title">Réglages</span></button>
@@ -866,7 +866,7 @@
         <p data-i18n="dashboard_subtitle">Ta progression, toutes matières confondues</p>
         <span class="hero-arrow">→</span>
       </div>
-      <div class="stat-card" onclick="openAdminPage()">
+      <div class="stat-card" data-student-only onclick="openAdminPage()">
         <span class="stat-ico">🎓</span>
         <h4 data-i18n="admin_title">Mes groupes</h4>
         <p data-i18n="groups_home_desc">Crée ou rejoins un groupe de révision.</p>
@@ -916,7 +916,7 @@
 <nav class="bottom-nav" id="bottomNav">
   <button class="bn-link active" data-nav="home" onclick="navGo('home')"><span>🏠</span><small data-i18n="nav_home">Accueil</small></button>
   <button class="bn-link" data-nav="dashboard" onclick="navGo('dashboard')"><span>📊</span><small data-i18n="dashboard_title">Tableau de bord</small></button>
-  <button class="bn-link" data-nav="groups" onclick="navGo('groups')"><span>🎓</span><small data-i18n="admin_title">Groupes</small></button>
+  <button class="bn-link" data-student-only data-nav="groups" onclick="navGo('groups')"><span>🎓</span><small data-i18n="admin_title">Groupes</small></button>
   <button class="bn-link" data-nav="prof" onclick="navGo('prof')" style="display:none;"><span>🧑‍🏫</span><small data-i18n="prof_page_nav_short">Prof</small></button>
   <button class="bn-link" data-nav="admin" onclick="navGo('admin')" style="display:none;"><span>🧑‍🏫</span><small data-i18n="adm_short">Admin</small></button>
   <button class="bn-link" data-nav="settings" onclick="navGo('settings')"><span>⚙</span><small data-i18n="settings_title">Réglages</small></button>
@@ -2711,6 +2711,8 @@ function applyProfNav(){
   const navs = document.querySelectorAll('[data-nav="prof"]');
   navs.forEach(el => { el.style.display = (isProf || isEtab) ? '' : 'none'; });
   document.querySelectorAll('[data-nav="admin"]').forEach(el => { el.style.display = isAdmin ? '' : 'none'; });
+  // Les groupes de révision entre étudiants ne concernent ni les professeurs ni les établissements
+  document.querySelectorAll('[data-student-only]').forEach(el => { el.style.display = (isProf || isEtab) ? 'none' : ''; });
 }
 function refreshProfStatus(){
   const uid = currentSession && currentSession.user ? currentSession.user.id : null;

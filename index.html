@@ -759,6 +759,36 @@
   }
   .landing-code-msg{font-size:.78rem; min-height:1.1em; margin-top:-2px;}
   .landing-soon{font-size:.72rem; color:var(--vyse-khaki); margin-top:-2px;}
+
+  /* ---- Page de présentation (publique) ---- */
+  .pres-page{display:none; position:fixed; inset:0; z-index:260; overflow-y:auto; background:#FBFBFB; color:#00000D; font-family:inherit; -webkit-overflow-scrolling:touch;}
+  .pres-page.active{display:block;}
+  .pres-bar{position:sticky; top:0; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 20px; background:rgba(251,251,251,.94); backdrop-filter:blur(6px); border-bottom:1px solid #e4e4ef;}
+  .pres-bar strong{font-size:1.05rem; letter-spacing:-.01em;} .pres-bar strong span{color:#6E6EF9;}
+  .pres-bar button{font-family:inherit; font-weight:700; font-size:.85rem; padding:9px 16px; border-radius:10px; cursor:pointer; border:1px solid #c9cce0; background:#fff; color:#00000D;}
+  .pres-bar button.p{background:#6E6EF9; border-color:#6E6EF9; color:#fff;}
+  .pres-wrap{max-width:980px; margin:0 auto; padding:0 20px 56px;}
+  .pres-hero{padding:56px 0 34px; max-width:720px;}
+  .pres-hero h1{font-size:clamp(1.8rem,4.6vw,2.8rem); line-height:1.12; letter-spacing:-.02em; margin:0 0 14px;}
+  .pres-hero h1 span{color:#6E6EF9;}
+  .pres-hero p{font-size:1.05rem; line-height:1.6; color:#3b3b48; margin:0 0 20px;}
+  .pres-cta{display:flex; flex-wrap:wrap; gap:10px;}
+  .pres-cta a,.pres-cta button{font-family:inherit; font-weight:700; font-size:.92rem; padding:12px 20px; border-radius:12px; cursor:pointer; text-decoration:none; border:1px solid #c9cce0; background:#fff; color:#00000D;}
+  .pres-cta .p{background:#6E6EF9; border-color:#6E6EF9; color:#fff;}
+  .pres-sec{padding:34px 0 6px; border-top:1px solid #e4e4ef; margin-top:30px;}
+  .pres-sec h2{font-size:1.45rem; letter-spacing:-.01em; margin:0 0 6px;}
+  .pres-sec .lead{color:#4b4b55; line-height:1.6; margin:0 0 18px; max-width:720px;}
+  .pres-grid{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(230px,1fr));}
+  .pres-card{background:#fff; border:1px solid #e4e4ef; border-radius:14px; padding:18px;}
+  .pres-card h3{font-size:1rem; margin:0 0 6px;} .pres-card p,.pres-card li{font-size:.9rem; line-height:1.55; color:#3b3b48; margin:0;}
+  .pres-card ul{margin:6px 0 0; padding-left:18px;}
+  .pres-big{font-size:2rem; font-weight:800; color:#6E6EF9; letter-spacing:-.02em; line-height:1; margin-bottom:6px;}
+  .pres-src{font-size:.74rem; color:#6b6b78; margin-top:10px; line-height:1.5;}
+  .pres-step{display:flex; gap:12px; align-items:flex-start;} .pres-step b{flex:0 0 30px; height:30px; border-radius:50%; background:#6E6EF9; color:#fff; display:flex; align-items:center; justify-content:center; font-size:.9rem;}
+  .pres-price{display:flex; flex-direction:column; gap:4px;} .pres-price .amt{font-size:1.6rem; font-weight:800;} .pres-price .amt small{font-size:.8rem; font-weight:600; color:#6b6b78;}
+  .pres-note{background:#f1f1fb; border-radius:12px; padding:12px 16px; font-size:.84rem; line-height:1.55; color:#3b3b48; margin-top:14px;}
+  .pres-foot{margin-top:40px; padding-top:20px; border-top:1px solid #e4e4ef; font-size:.8rem; color:#6b6b78; line-height:1.6;}
+  @media(max-width:480px){ .pres-hero{padding-top:36px;} .pres-bar{padding:10px 14px;} }
   .landing-footer-links{display:flex; gap:18px; margin-top:2px;}
   .landing-footer-links button{background:none; border:none; color:rgba(251,251,251,.55); font-size:.8rem; cursor:pointer; text-decoration:underline; padding:0; font-family:inherit;}
   .landing-footer-links button:hover{color:#fff;}
@@ -781,6 +811,107 @@
 <body>
 
 <!-- Page d'accueil (vitrine) : premier écran vu par tout nouveau visiteur -->
+
+<div class="pres-page" id="presPage" role="dialog" aria-modal="true" aria-label="Présentation de Vyse AI">
+  <div class="pres-bar">
+    <strong>Vyse <span>AI</span></strong>
+    <span style="display:flex; gap:8px;">
+      <button class="p" onclick="presContact()">Nous contacter</button>
+      <button onclick="closePresentation()">← Retour</button>
+    </span>
+  </div>
+  <div class="pres-wrap">
+    <section class="pres-hero">
+      <h1>La révision assistée par IA, <span>dans le cadre fixé par l'enseignant.</span></h1>
+      <p>Vyse AI transforme les cours que les enseignants déposent en fiches, QCM et assistant de révision pour leurs étudiants, avec des accès gérés par l'établissement et des données hébergées en Europe.</p>
+      <div class="pres-cta">
+        <button class="p" onclick="presContact()">Demander un échange</button>
+        <button onclick="document.getElementById('presTarifs').scrollIntoView({behavior:'smooth'})">Voir les tarifs indicatifs</button>
+      </div>
+    </section>
+
+    <section class="pres-sec">
+      <h2>Le constat</h2>
+      <p class="lead">Les étudiants utilisent déjà l'IA, mais sans cadre. Les enseignants veulent l'encadrer, sans outil simple qui s'appuie sur leur propre cours.</p>
+      <div class="pres-grid">
+        <div class="pres-card"><div class="pres-big">94 %</div><p>des étudiants ont déjà utilisé une IA, et 48 % le font chaque jour.</p><div class="pres-src">Ipsos / EPITA, janvier 2026</div></div>
+        <div class="pres-card"><div class="pres-big">15 %</div><p>seulement ont reçu des consignes précises sur l'usage de l'IA ; 62 % attendent des directives claires.</p><div class="pres-src">Enquête auprès d'étudiants de Bordeaux</div></div>
+        <div class="pres-card"><div class="pres-big">93 %</div><p>des enseignants interrogés souhaitent un encadrement de l'usage de l'IA.</p><div class="pres-src">Sphinx / Compilatio, 2023</div></div>
+      </div>
+    </section>
+
+    <section class="pres-sec">
+      <h2>Comment ça marche</h2>
+      <p class="lead">Trois étapes, sans e-mail à gérer pour les étudiants et les établissements.</p>
+      <div class="pres-grid">
+        <div class="pres-card pres-step"><b>1</b><div><h3>L'enseignant dépose son cours</h3><p>PDF, Word, PowerPoint (.pptx avec notes), texte ou sous-titres (.srt, .vtt).</p></div></div>
+        <div class="pres-card pres-step"><b>2</b><div><h3>L'IA prépare la révision</h3><p>Fiches, QCM et chat de cours générés à partir de ce cours, et seulement de lui. L'enseignant relit avant publication.</p></div></div>
+        <div class="pres-card pres-step"><b>3</b><div><h3>Les étudiants révisent</h3><p>Ils rejoignent le cours avec leur code, valident les chapitres par QCM et posent leurs questions à l'assistant.</p></div></div>
+      </div>
+    </section>
+
+    <section class="pres-sec">
+      <h2>Pour qui</h2>
+      <div class="pres-grid">
+        <div class="pres-card"><h3>🏫 L'établissement</h3><ul><li>Crée ses groupes et génère les codes étudiants (jusqu'à 500 à la fois).</li><li>Imprime les cartes d'accès, suit la progression.</li><li>Réinitialise l'accès d'un étudiant.</li><li>Active ou coupe le chat entre étudiants.</li></ul></div>
+        <div class="pres-card"><h3>🧑‍🏫 L'enseignant</h3><ul><li>Dépose et relit ses cours.</li><li>Inscrit des groupes ou des étudiants à un cours.</li><li>Garde la main sur ce que l'IA utilise.</li></ul></div>
+        <div class="pres-card"><h3>🎓 L'étudiant</h3><ul><li>Se connecte avec un code personnel, sans e-mail.</li><li>Fiches, QCM et chat de cours.</li><li>Groupes de révision entre étudiants.</li><li>Interface en français et en anglais, mode dyslexie, lecture audio.</li></ul></div>
+      </div>
+    </section>
+
+    <section class="pres-sec">
+      <h2>Ce qui nous distingue</h2>
+      <div class="pres-grid">
+        <div class="pres-card"><h3>Le cours de l'enseignant</h3><p>L'IA s'appuie sur les cours déposés, pas sur Internet en général.</p></div>
+        <div class="pres-card"><h3>Piloté par l'établissement</h3><p>Les accès sont créés et gérés par l'établissement, pas par chaque étudiant.</p></div>
+        <div class="pres-card"><h3>Simple à lancer</h3><p>Aucune adresse e-mail à collecter côté étudiants et établissements.</p></div>
+        <div class="pres-card"><h3>Données en Europe</h3><p>Base de données hébergée à Paris (Supabase, région eu-west-3).</p></div>
+      </div>
+    </section>
+
+    <section class="pres-sec">
+      <h2>Données et confiance</h2>
+      <div class="pres-grid">
+        <div class="pres-card"><h3>Rôles clairs</h3><p>L'établissement est responsable de traitement, Vyse AI est sous-traitant. Aucune revente de données.</p></div>
+        <div class="pres-card"><h3>Chat encadré</h3><p>Texte seul, prénom affiché, signalement et modération par le créateur du groupe. Messages visibles 30 jours. L'établissement peut couper le chat mais ne lit pas les conversations.</p></div>
+        <div class="pres-card"><h3>Ce que Vyse ne fait pas</h3><p>Pas de notation, pas de décision d'admission, pas de surveillance d'examens, pas de vente aux étudiants, pas de transcription de vidéos.</p></div>
+      </div>
+      <div class="pres-note">Les textes juridiques (mentions légales, confidentialité, convention de traitement des données) sont en cours de relecture par un juriste. Les contenus générés par l'IA doivent toujours être vérifiés.</div>
+    </section>
+
+    <section class="pres-sec" id="presTarifs">
+      <h2>Tarifs indicatifs</h2>
+      <p class="lead">Licence annuelle par établissement, étudiants non facturés individuellement. Grille de travail 2026-2027, en euros hors taxes.</p>
+      <div class="pres-grid">
+        <div class="pres-card pres-price"><h3>Classe pilote</h3><div class="amt">190 €<small> / 3 mois</small></div><p>1 enseignant, 35 étudiants. Pour tester sur une vraie classe.</p></div>
+        <div class="pres-card pres-price"><h3>Essentiel</h3><div class="amt">1 490 €<small> / an</small></div><p>Jusqu'à 5 enseignants et 300 étudiants.</p></div>
+        <div class="pres-card pres-price"><h3>Établissement</h3><div class="amt">3 900 €<small> / an</small></div><p>Jusqu'à 15 enseignants et 800 étudiants.</p></div>
+        <div class="pres-card pres-price"><h3>Réseau</h3><div class="amt">Sur devis</div><p>Plusieurs établissements ou besoins spécifiques.</p></div>
+      </div>
+      <div class="pres-grid" style="margin-top:14px;">
+        <div class="pres-card"><h3>Options</h3><ul><li>Formation en visio : 290 €</li><li>Prise en main sur site : 590 € + frais</li><li>Cours clés en main : 450 €</li><li>Enseignant supplémentaire : 120 € / an</li><li>Pack de 100 étudiants : 300 € / an</li></ul></div>
+      </div>
+      <div class="pres-note"><strong>Ces tarifs sont indicatifs et non contractuels.</strong> Ils seront confirmés à l'issue de la phase pilote. Vyse AI est aujourd'hui un projet en phase de test, aucun paiement n'est demandé.</div>
+    </section>
+
+    <section class="pres-sec">
+      <h2>Où en est le projet</h2>
+      <div class="pres-grid">
+        <div class="pres-card"><h3>Maintenant</h3><p>Application fonctionnelle en phase de test, tests de bout en bout et relecture juridique.</p></div>
+        <div class="pres-card"><h3>Hiver 2026-2027</h3><p>Entretiens avec des enseignants et des établissements, puis recherche d'un établissement pilote.</p></div>
+        <div class="pres-card"><h3>Printemps 2027</h3><p>Pilote dans un établissement d'enseignement supérieur.</p></div>
+        <div class="pres-card"><h3>Rentrée 2027</h3><p>Ouverture visée à deux ou trois établissements.</p></div>
+      </div>
+      <div class="pres-cta" style="margin-top:22px;">
+        <button class="p" onclick="presContact()">Devenir établissement pilote</button>
+        <button onclick="closePresentation()">Accéder à l'application</button>
+      </div>
+    </section>
+
+    <div class="pres-foot">Vyse AI est un projet personnel porté par Thomas LEVEQUE. Contact : <a href="mailto:contact.vyseai@gmail.com">contact.vyseai@gmail.com</a>. Les informations de cette page sont données à titre indicatif et ne constituent ni un engagement contractuel ni un conseil juridique.</div>
+  </div>
+</div>
+
 <div class="landing-page" id="landingPage">
   <div class="landing-inner">
     <div class="landing-hero">
@@ -807,6 +938,7 @@
         <button class="landing-btn secondary" onclick="openProfModal('prof')" data-i18n="landing_prof_btn">Professeur</button>
         <button class="landing-btn secondary" onclick="openProfModal('etab')" data-i18n="landing_etab_btn">Établissement</button>
       </div>
+      <button class="landing-btn secondary" id="landingPresBtn" onclick="openPresentation()" style="width:100%;">📄 Page de présentation</button>
     </div>
 
     <div class="landing-footer-links">
@@ -2862,6 +2994,9 @@ async function submitProfAuth(){
       : (em || t('msg_generic_error'));
   }
 }
+function openPresentation(){ const p = document.getElementById('presPage'); p.classList.add('active'); p.scrollTop = 0; document.body.style.overflow = 'hidden'; }
+function closePresentation(){ document.getElementById('presPage').classList.remove('active'); document.body.style.overflow = ''; }
+function presContact(){ location.href = 'mailto:contact.vyseai@gmail.com?subject=' + encodeURIComponent('Vyse AI — demande d\'échange'); }
 function openLegalModal(){ document.getElementById('legalOverlay').classList.add('active'); }
 function closeLegalModal(){ document.getElementById('legalOverlay').classList.remove('active'); }
 function setLegalTab(tab){

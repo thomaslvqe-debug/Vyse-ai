@@ -737,6 +737,36 @@
   .dsh-form label{display:flex; flex-direction:column; gap:4px; font-size:.78rem; font-weight:600; color:#4A5E55; min-width:0;}
   .dsh-form label.wide{grid-column:1 / -1;}
   @media (max-width:560px){ .dsh-form{grid-template-columns:1fr;} }
+  /* Téléphone : chaque ligne devient une fiche, sans défilement horizontal */
+  @media (max-width:760px){
+    .dsh-wrap{ overflow:visible; max-height:none; border:none; }
+    .dsh-table, .dsh-table tbody{ display:block; width:100%; }
+    .dsh-table thead{ display:none; }
+    .dsh-table tr{ display:block; background:#fff; border:1px solid #E5EAE0; border-radius:12px; padding:10px 12px; margin-bottom:10px; }
+    .dsh-table td{ display:flex; gap:10px; justify-content:space-between; align-items:baseline; border:none; padding:3px 0; white-space:normal !important; min-width:0 !important; text-align:right; overflow-wrap:anywhere; }
+    .dsh-table td::before{ content:attr(data-label); font-size:.72rem; color:#6b7280; text-align:left; flex:none; max-width:45%; }
+    .dsh-table td.dsh-main{ display:block; text-align:left; font-size:.95rem; padding-bottom:6px; }
+    .dsh-table td.dsh-main::before{ content:none; }
+    .dsh-table td.dsh-empty{ display:none; }
+    .dsh-table td.dsh-actions{ display:flex; justify-content:flex-start; flex-wrap:wrap; gap:6px; padding-top:8px; margin-top:6px; border-top:1px solid #EDF2EA; }
+    .dsh-table td.dsh-actions::before{ content:none; }
+    .dsh-table td.dsh-actions .btn{ flex:1 1 auto; padding:9px 10px !important; font-size:.8rem !important; }
+    .dsh-table td[colspan]{ display:block; text-align:left; }
+    .dsh-table td[colspan]::before{ content:none; }
+    #admPaneDash .cls-toolbar{ flex-wrap:wrap; }
+    #admPaneDash .cls-toolbar > .ed-in, #admPaneDash .cls-toolbar > select{ flex:1 1 100% !important; width:100%; }
+    #admPaneDash .cls-toolbar > .btn{ flex:1 1 auto; }
+    .dsh-sub{ flex-wrap:wrap; }
+    .dsh-chip{ flex:1 1 auto; padding:8px 10px; }
+    .dsh-box{ padding:18px 16px 0; max-height:88vh; }
+    .dsh-box > div:last-child{ position:sticky; bottom:0; background:#FAF7F2; padding:12px 0 16px; margin-top:8px !important; border-top:1px solid #E5E0D5; }
+    .dsh-box > div:last-child .btn{ flex:1; }
+    .dsh-task div{ min-width:0; overflow-wrap:anywhere; }
+    .dsh-kpis{ grid-template-columns:1fr 1fr; gap:8px; }
+    .dsh-kpi{ padding:10px; }
+    .dsh-kpi strong{ font-size:1.05rem; }
+    #admPaneDash .cls-toolbar label{ flex:1 1 100%; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  }
   .cls-flash{ padding:12px 16px; border-radius:12px; margin-bottom:12px; font-size:.9rem; }
   .cls-flash.ok{ background:#e9f4ec; color:#14532d; border:1px solid #bfe3c9; }
   .cls-flash.err{ background:#fbeae6; color:#7f1d1d; border:1px solid #f3c0b6; }
@@ -5553,7 +5583,7 @@ function dshList(key){
         <button type="button" class="btn" onclick="dshEdit('${key}')">+ ${escapeHtml(c.add)}</button>
       </div>
       <p id="dshCount" style="font-size:.78rem; color:#6b7280; margin:0 0 8px;"></p>
-      <div class="cls-tablewrap"><table class="cls-table"><thead><tr>${c.fields.map(f => `<th>${escapeHtml(f.l)}</th>`).join('')}<th></th></tr></thead>
+      <div class="cls-tablewrap dsh-wrap"><table class="cls-table dsh-table"><thead><tr>${c.fields.map(f => `<th>${escapeHtml(f.l)}</th>`).join('')}<th></th></tr></thead>
         <tbody id="dshRows"></tbody></table></div>
     </div>`;
 }
@@ -5570,8 +5600,8 @@ function dshRows(key){
   if(key === 'expenses' || key === 'revenues') extra = ' · total : ' + dshEur(rows.reduce((s, r) => s + Number(r.amount || 0), 0));
   document.getElementById('dshCount').textContent = rows.length + (rows.length !== all.length ? ' sur ' + all.length : '') + ' ligne(s)' + extra;
   const b = 'class="btn cls-ghost" style="padding:4px 10px; font-size:.75rem;"';
-  tb.innerHTML = rows.map(r => `<tr${r.status === 'Fait' ? ' style="opacity:.55;"' : ''}>${c.fields.map((f, i) => `<td${i === 0 || f.req ? ' style="white-space:normal; min-width:160px; font-weight:600; cursor:pointer;" onclick="dshEdit(\'' + key + '\',\'' + r.id + '\')"' : ''}>${dshShow(f, r[f.k])}</td>`).join('')}
-    <td style="white-space:nowrap;">${key === 'tasks' && r.status !== 'Fait' ? `<button type="button" ${b} onclick="dshDone('${r.id}')">✓ Fait</button> ` : ''}<button type="button" ${b} onclick="dshEdit('${key}','${r.id}')">Modifier</button> <button type="button" ${b} onclick="dshDelete('${key}','${r.id}')">Supprimer</button></td></tr>`).join('')
+  tb.innerHTML = rows.map(r => `<tr${r.status === 'Fait' ? ' style="opacity:.55;"' : ''}>${c.fields.map((f, i) => { const v = dshShow(f, r[f.k]); const main = i === 0 || f.req; return `<td data-label="${escapeHtml(f.l)}" class="${main ? 'dsh-main' : ''}${v === '' ? ' dsh-empty' : ''}"${main ? ' style="white-space:normal; min-width:160px; font-weight:600; cursor:pointer;" onclick="dshEdit(\'' + key + '\',\'' + r.id + '\')"' : ''}>${v}</td>`; }).join('')}
+    <td class="dsh-actions" style="white-space:nowrap;">${key === 'tasks' && r.status !== 'Fait' ? `<button type="button" ${b} onclick="dshDone('${r.id}')">✓ Fait</button> ` : ''}<button type="button" ${b} onclick="dshEdit('${key}','${r.id}')">Modifier</button> <button type="button" ${b} onclick="dshDelete('${key}','${r.id}')">Supprimer</button></td></tr>`).join('')
     || `<tr><td colspan="${c.fields.length + 1}">Aucune ligne. Ajoute-en une ou importe un fichier Excel.</td></tr>`;
 }
 

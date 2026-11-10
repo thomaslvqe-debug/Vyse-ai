@@ -1339,10 +1339,12 @@
 
     <div id="accountResetPassword" style="display:none;">
       <p style="font-size:.92rem;" data-i18n="reset_text">Choisis un nouveau mot de passe pour ton compte.</p>
-      <input type="password" id="newPasswordField" placeholder="Nouveau mot de passe (6 caractères min.)" data-i18n-ph="ph_new_password">
+      <input type="text" id="resetCodeField" placeholder="Code reçu par e-mail" autocomplete="one-time-code" inputmode="numeric" maxlength="10" style="display:none;">
+      <input type="password" id="currentPasswordField" placeholder="Mot de passe actuel" autocomplete="current-password" style="display:none;">
+      <input type="password" id="newPasswordField" placeholder="Nouveau mot de passe (8 caractères min.)" data-i18n-ph="ph_new_password" autocomplete="new-password">
       <div class="auth-msg" id="resetMsg"></div>
       <button class="btn" onclick="submitNewPassword()" data-i18n="btn_update_password">Mettre à jour le mot de passe</button>
-      <button class="btn ghost" style="margin-top:8px;" onclick="inRecoveryFlow = false; renderAccountUI();" data-i18n="reset_cancel">Annuler</button>
+      <button class="btn ghost" style="margin-top:8px;" onclick="cancelPasswordReset()" data-i18n="reset_cancel">Annuler</button>
     </div>
   </div>
 </div>
@@ -1386,6 +1388,10 @@
       <input type="password" id="profPassword" placeholder="Mot de passe (6 caractères min.)" autocomplete="current-password" data-i18n-ph="ph_password">
       <div style="text-align:right; margin:-4px 0 10px;"><button type="button" id="profForgotLink" onclick="closeProfModal(); openAccount(); setAuthMode('forgot')" style="background:none;border:none;color:var(--bark-600);font-size:.78rem;cursor:pointer;text-decoration:underline;padding:0;" data-i18n="forgot_link">Mot de passe oublié ?</button></div>
       </div>
+      <div id="profVerifyBox" style="display:none;">
+        <input type="text" id="profVerifyCode" placeholder="Code reçu par e-mail" autocomplete="one-time-code" inputmode="numeric" maxlength="10" onkeydown="if(event.key==='Enter'){event.preventDefault();submitProfVerify();}">
+        <button type="button" class="btn" style="margin-bottom:10px;" onclick="submitProfVerify()">Valider le code</button>
+      </div>
       <div class="auth-msg" id="profAuthMsg"></div>
       <button class="btn" id="profAuthSubmitBtn" onclick="submitProfAuth()" data-i18n="btn_login">Se connecter</button>
       <p id="profNote" style="font-size:.78rem; color:#6b7280; margin-top:12px;" data-i18n="prof_note">Ton espace professeur te permet de déposer tes cours et de générer des codes pour tes étudiants.</p>
@@ -1405,6 +1411,7 @@
   </div>
 </div>
 
+<script crossorigin="anonymous" data-clerk-publishable-key="pk_test_aGFwcHktbWFsbGFyZC01MDU3LmNsZXJrLmFjY291bnRzLmRldiQ" src="https://happy-mallard-5057.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js" type="text/javascript"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -1487,15 +1494,15 @@ add_module_title:"Ajouter un module libre (notes, fiches…)", ph_module_title:"
 group_controlled_note:"Les modules affichés sont définis par ton prof pour le groupe « {group} ». Contacte-le pour toute modification.", your_course_tag:" (ton cours)",
 btn_delete:"Supprimer",
 account_title:"Mon compte", tab_login:"Connexion", tab_signup:"Créer un compte",
-ph_prenom:"Prénom", ph_nom:"Nom", ph_group_code:"Code de classe / groupe (optionnel)", ph_email:"Adresse email", ph_password:"Mot de passe (6 caractères min.)",
+ph_prenom:"Prénom", ph_nom:"Nom", ph_group_code:"Code de classe / groupe (optionnel)", ph_email:"Adresse email", ph_password:"Mot de passe (8 caractères min.)",
 forgot_link:"Mot de passe oublié ?", btn_login:"Se connecter", btn_signup:"Créer le compte",
 account_note:"Ton compte garde ta progression (chapitres validés, préférences…) même si tu changes d'appareil ou de navigateur.",
-forgot_text:"Indique ton email : on t'envoie un lien pour choisir un nouveau mot de passe.", btn_send_reset:"Envoyer le lien", btn_back_login:"← Retour à la connexion",
-reset_text:"Choisis un nouveau mot de passe pour ton compte.", ph_new_password:"Nouveau mot de passe (6 caractères min.)", btn_update_password:"Mettre à jour le mot de passe",
+forgot_text:"Indique ton e-mail : on t'envoie un code pour choisir un nouveau mot de passe.", btn_send_reset:"Envoyer le code", btn_back_login:"← Retour à la connexion",
+reset_text:"Choisis un nouveau mot de passe pour ton compte.", ph_new_password:"Nouveau mot de passe (8 caractères min.)", btn_update_password:"Mettre à jour le mot de passe",
 msg_need_email_pw:"Renseigne un email et un mot de passe.", msg_wait:"Un instant…", msg_created_connected:"Compte créé, tu es connecté(e) !",
-msg_created_confirm_email:"Compte créé ! Vérifie ta boîte mail pour confirmer ton adresse, puis connecte-toi.", msg_connected:"Connecté(e) !",
+msg_created_confirm_email:"Un code de vérification a été envoyé à ton adresse e-mail : saisis-le ci-dessous.", msg_connected:"Connecté(e) !",
 msg_invalid_creds:"Email ou mot de passe incorrect.", msg_generic_error:"Une erreur est survenue.", msg_need_email:"Indique ton adresse email.",
-msg_sending:"Envoi en cours…", msg_reset_sent:"Email envoyé ! Clique sur le lien reçu pour choisir un nouveau mot de passe.", msg_need_6chars:"6 caractères minimum.",
+msg_sending:"Envoi en cours…", msg_reset_sent:"Si un compte existe pour cette adresse, un code vient d\u2019être envoyé. Saisis-le avec ton nouveau mot de passe.", msg_need_6chars:"8 caractères minimum.",
 msg_updating:"Mise à jour…", msg_password_updated:"Mot de passe mis à jour !", msg_need_nom_prenom:"Renseigne ton nom et ton prénom.",
 admin_title:"Mes groupes", admin_create_t:"Créer un groupe", admin_create_text:"Donne un nom à ton groupe (classe, promo…). Un code unique est généré : partage-le avec les personnes qui doivent le rejoindre.",
 ph_group_name:"Nom du groupe", btn_create_group:"Créer le groupe", admin_created_t:"Groupes que j'ai créés", btn_configure_display:"Configurer l'affichage",
@@ -1572,15 +1579,15 @@ add_module_title:"Add a free-form module (notes, sheets…)", ph_module_title:"M
 group_controlled_note:"The visible modules are set by your teacher for the group « {group} ». Contact them for any change.", your_course_tag:" (your course)",
 btn_delete:"Delete",
 account_title:"My account", tab_login:"Log in", tab_signup:"Create an account",
-ph_prenom:"First name", ph_nom:"Last name", ph_group_code:"Class / group code (optional)", ph_email:"Email address", ph_password:"Password (6 characters min.)",
+ph_prenom:"First name", ph_nom:"Last name", ph_group_code:"Class / group code (optional)", ph_email:"Email address", ph_password:"Password (8 characters min.)",
 forgot_link:"Forgot your password?", btn_login:"Log in", btn_signup:"Create account",
 account_note:"Your account keeps your progress (passed chapters, preferences…) even if you switch device or browser.",
-forgot_text:"Enter your email: we'll send you a link to choose a new password.", btn_send_reset:"Send the link", btn_back_login:"← Back to login",
-reset_text:"Choose a new password for your account.", ph_new_password:"New password (6 characters min.)", btn_update_password:"Update password",
+forgot_text:"Enter your email: we'll send you a code to choose a new password.", btn_send_reset:"Send the code", btn_back_login:"← Back to login",
+reset_text:"Choose a new password for your account.", ph_new_password:"New password (8 characters min.)", btn_update_password:"Update password",
 msg_need_email_pw:"Enter an email and a password.", msg_wait:"One moment…", msg_created_connected:"Account created, you're logged in!",
-msg_created_confirm_email:"Account created! Check your inbox to confirm your address, then log in.", msg_connected:"Logged in!",
+msg_created_confirm_email:"A verification code has been sent to your email address: enter it below.", msg_connected:"Logged in!",
 msg_invalid_creds:"Incorrect email or password.", msg_generic_error:"Something went wrong.", msg_need_email:"Enter your email address.",
-msg_sending:"Sending…", msg_reset_sent:"Email sent! Click the link you received to choose a new password.", msg_need_6chars:"6 characters minimum.",
+msg_sending:"Sending…", msg_reset_sent:"If an account exists for this address, a code has been sent. Enter it with your new password.", msg_need_6chars:"8 characters minimum.",
 msg_updating:"Updating…", msg_password_updated:"Password updated!", msg_need_nom_prenom:"Enter your first and last name.",
 admin_title:"My groups", admin_create_t:"Create a group", admin_create_text:"Give your group a name (class, cohort…). A unique code is generated: share it with the people who need to join.",
 ph_group_name:"Group name", btn_create_group:"Create group", admin_created_t:"Groups I created", btn_configure_display:"Configure display",
@@ -1656,15 +1663,15 @@ add_module_title:"Añadir un módulo libre (notas, fichas…)", ph_module_title:
 group_controlled_note:"Los módulos visibles los define tu profesor para el grupo « {group} ». Contacta con él para cualquier cambio.", your_course_tag:" (tu curso)",
 btn_delete:"Eliminar",
 account_title:"Mi cuenta", tab_login:"Iniciar sesión", tab_signup:"Crear cuenta",
-ph_prenom:"Nombre", ph_nom:"Apellido", ph_group_code:"Código de clase / grupo (opcional)", ph_email:"Correo electrónico", ph_password:"Contraseña (6 caracteres mín.)",
+ph_prenom:"Nombre", ph_nom:"Apellido", ph_group_code:"Código de clase / grupo (opcional)", ph_email:"Correo electrónico", ph_password:"Contraseña (8 caracteres mín.)",
 forgot_link:"¿Has olvidado tu contraseña?", btn_login:"Iniciar sesión", btn_signup:"Crear cuenta",
 account_note:"Tu cuenta conserva tu progreso (capítulos aprobados, preferencias…) aunque cambies de dispositivo o navegador.",
 forgot_text:"Indica tu correo: te enviamos un enlace para elegir una nueva contraseña.", btn_send_reset:"Enviar el enlace", btn_back_login:"← Volver al inicio de sesión",
-reset_text:"Elige una nueva contraseña para tu cuenta.", ph_new_password:"Nueva contraseña (6 caracteres mín.)", btn_update_password:"Actualizar contraseña",
+reset_text:"Elige una nueva contraseña para tu cuenta.", ph_new_password:"Nueva contraseña (8 caracteres mín.)", btn_update_password:"Actualizar contraseña",
 msg_need_email_pw:"Indica un correo y una contraseña.", msg_wait:"Un momento…", msg_created_connected:"¡Cuenta creada, has iniciado sesión!",
 msg_created_confirm_email:"¡Cuenta creada! Revisa tu correo para confirmar tu dirección y luego inicia sesión.", msg_connected:"¡Sesión iniciada!",
 msg_invalid_creds:"Correo o contraseña incorrectos.", msg_generic_error:"Ha ocurrido un error.", msg_need_email:"Indica tu correo electrónico.",
-msg_sending:"Enviando…", msg_reset_sent:"¡Correo enviado! Haz clic en el enlace recibido para elegir una nueva contraseña.", msg_need_6chars:"6 caracteres mínimo.",
+msg_sending:"Enviando…", msg_reset_sent:"¡Correo enviado! Haz clic en el enlace recibido para elegir una nueva contraseña.", msg_need_6chars:"8 caracteres mínimo.",
 msg_updating:"Actualizando…", msg_password_updated:"¡Contraseña actualizada!", msg_need_nom_prenom:"Indica tu nombre y apellido.",
 admin_title:"Mis grupos", admin_create_t:"Crear un grupo", admin_create_text:"Dale un nombre a tu grupo (clase, promoción…). Se genera un código único: compártelo con quienes deban unirse.",
 ph_group_name:"Nombre del grupo", btn_create_group:"Crear el grupo", admin_created_t:"Grupos que he creado", btn_configure_display:"Configurar visualización",
@@ -1740,15 +1747,15 @@ add_module_title:"Aggiungi un modulo libero (appunti, schede…)", ph_module_tit
 group_controlled_note:"I moduli visibili sono impostati dal tuo insegnante per il gruppo « {group} ». Contattalo per qualsiasi modifica.", your_course_tag:" (il tuo corso)",
 btn_delete:"Elimina",
 account_title:"Il mio account", tab_login:"Accedi", tab_signup:"Crea un account",
-ph_prenom:"Nome", ph_nom:"Cognome", ph_group_code:"Codice classe / gruppo (facoltativo)", ph_email:"Indirizzo email", ph_password:"Password (min. 6 caratteri)",
+ph_prenom:"Nome", ph_nom:"Cognome", ph_group_code:"Codice classe / gruppo (facoltativo)", ph_email:"Indirizzo email", ph_password:"Password (min. 8 caratteri)",
 forgot_link:"Password dimenticata?", btn_login:"Accedi", btn_signup:"Crea account",
 account_note:"Il tuo account conserva i tuoi progressi (capitoli superati, preferenze…) anche cambiando dispositivo o browser.",
 forgot_text:"Indica la tua email: ti invieremo un link per scegliere una nuova password.", btn_send_reset:"Invia il link", btn_back_login:"← Torna al login",
-reset_text:"Scegli una nuova password per il tuo account.", ph_new_password:"Nuova password (min. 6 caratteri)", btn_update_password:"Aggiorna password",
+reset_text:"Scegli una nuova password per il tuo account.", ph_new_password:"Nuova password (min. 8 caratteri)", btn_update_password:"Aggiorna password",
 msg_need_email_pw:"Indica un'email e una password.", msg_wait:"Un attimo…", msg_created_connected:"Account creato, hai effettuato l'accesso!",
 msg_created_confirm_email:"Account creato! Controlla la tua email per confermare l'indirizzo, poi accedi.", msg_connected:"Accesso effettuato!",
 msg_invalid_creds:"Email o password errati.", msg_generic_error:"Si è verificato un errore.", msg_need_email:"Indica il tuo indirizzo email.",
-msg_sending:"Invio in corso…", msg_reset_sent:"Email inviata! Clicca sul link ricevuto per scegliere una nuova password.", msg_need_6chars:"Minimo 6 caratteri.",
+msg_sending:"Invio in corso…", msg_reset_sent:"Email inviata! Clicca sul link ricevuto per scegliere una nuova password.", msg_need_6chars:"Minimo 8 caratteri.",
 msg_updating:"Aggiornamento…", msg_password_updated:"Password aggiornata!", msg_need_nom_prenom:"Indica il tuo nome e cognome.",
 admin_title:"I miei gruppi", admin_create_t:"Crea un gruppo", admin_create_text:"Dai un nome al tuo gruppo (classe, coorte…). Viene generato un codice unico: condividilo con chi deve unirsi.",
 ph_group_name:"Nome del gruppo", btn_create_group:"Crea il gruppo", admin_created_t:"Gruppi che ho creato", btn_configure_display:"Configura visualizzazione",
@@ -1824,15 +1831,15 @@ add_module_title:"Adicionar um módulo livre (notas, fichas…)", ph_module_titl
 group_controlled_note:"Os módulos visíveis são definidos pelo teu professor para o grupo « {group} ». Contacta-o para qualquer alteração.", your_course_tag:" (o teu curso)",
 btn_delete:"Eliminar",
 account_title:"A minha conta", tab_login:"Iniciar sessão", tab_signup:"Criar conta",
-ph_prenom:"Nome próprio", ph_nom:"Apelido", ph_group_code:"Código de turma / grupo (opcional)", ph_email:"Endereço de email", ph_password:"Palavra-passe (mín. 6 carateres)",
+ph_prenom:"Nome próprio", ph_nom:"Apelido", ph_group_code:"Código de turma / grupo (opcional)", ph_email:"Endereço de email", ph_password:"Palavra-passe (mín. 8 carateres)",
 forgot_link:"Esqueceste-te da palavra-passe?", btn_login:"Iniciar sessão", btn_signup:"Criar conta",
 account_note:"A tua conta guarda o teu progresso (capítulos aprovados, preferências…) mesmo mudando de aparelho ou navegador.",
 forgot_text:"Indica o teu email: enviamos-te um link para escolheres uma nova palavra-passe.", btn_send_reset:"Enviar o link", btn_back_login:"← Voltar ao início de sessão",
-reset_text:"Escolhe uma nova palavra-passe para a tua conta.", ph_new_password:"Nova palavra-passe (mín. 6 carateres)", btn_update_password:"Atualizar palavra-passe",
+reset_text:"Escolhe uma nova palavra-passe para a tua conta.", ph_new_password:"Nova palavra-passe (mín. 8 carateres)", btn_update_password:"Atualizar palavra-passe",
 msg_need_email_pw:"Indica um email e uma palavra-passe.", msg_wait:"Um momento…", msg_created_connected:"Conta criada, sessão iniciada!",
 msg_created_confirm_email:"Conta criada! Verifica o teu email para confirmar o endereço e depois inicia sessão.", msg_connected:"Sessão iniciada!",
 msg_invalid_creds:"Email ou palavra-passe incorretos.", msg_generic_error:"Ocorreu um erro.", msg_need_email:"Indica o teu endereço de email.",
-msg_sending:"A enviar…", msg_reset_sent:"Email enviado! Clica no link recebido para escolher uma nova palavra-passe.", msg_need_6chars:"Mínimo 6 carateres.",
+msg_sending:"A enviar…", msg_reset_sent:"Email enviado! Clica no link recebido para escolher uma nova palavra-passe.", msg_need_6chars:"Mínimo 8 carateres.",
 msg_updating:"A atualizar…", msg_password_updated:"Palavra-passe atualizada!", msg_need_nom_prenom:"Indica o teu nome e apelido.",
 admin_title:"Os meus grupos", admin_create_t:"Criar um grupo", admin_create_text:"Dá um nome ao teu grupo (turma, coorte…). É gerado um código único: partilha-o com quem precisa de aderir.",
 ph_group_name:"Nome do grupo", btn_create_group:"Criar o grupo", admin_created_t:"Grupos que criei", btn_configure_display:"Configurar visualização",
@@ -1908,15 +1915,15 @@ add_module_title:"Dodaj własny moduł (notatki, fiszki…)", ph_module_title:"T
 group_controlled_note:"Widoczne moduły ustala twój nauczyciel dla grupy « {group} ». Skontaktuj się z nim w razie potrzeby zmiany.", your_course_tag:" (twój kurs)",
 btn_delete:"Usuń",
 account_title:"Moje konto", tab_login:"Logowanie", tab_signup:"Załóż konto",
-ph_prenom:"Imię", ph_nom:"Nazwisko", ph_group_code:"Kod klasy / grupy (opcjonalnie)", ph_email:"Adres e-mail", ph_password:"Hasło (min. 6 znaków)",
+ph_prenom:"Imię", ph_nom:"Nazwisko", ph_group_code:"Kod klasy / grupy (opcjonalnie)", ph_email:"Adres e-mail", ph_password:"Hasło (min. 8 znaków)",
 forgot_link:"Zapomniałeś/aś hasła?", btn_login:"Zaloguj się", btn_signup:"Załóż konto",
 account_note:"Twoje konto zachowuje twój postęp (zaliczone rozdziały, preferencje…) nawet po zmianie urządzenia lub przeglądarki.",
 forgot_text:"Podaj swój e-mail: wyślemy ci link do wyboru nowego hasła.", btn_send_reset:"Wyślij link", btn_back_login:"← Powrót do logowania",
-reset_text:"Wybierz nowe hasło do swojego konta.", ph_new_password:"Nowe hasło (min. 6 znaków)", btn_update_password:"Zaktualizuj hasło",
+reset_text:"Wybierz nowe hasło do swojego konta.", ph_new_password:"Nowe hasło (min. 8 znaków)", btn_update_password:"Zaktualizuj hasło",
 msg_need_email_pw:"Podaj e-mail i hasło.", msg_wait:"Chwileczkę…", msg_created_connected:"Konto utworzone, jesteś zalogowany(a)!",
 msg_created_confirm_email:"Konto utworzone! Sprawdź swoją skrzynkę, aby potwierdzić adres, a następnie się zaloguj.", msg_connected:"Zalogowano!",
 msg_invalid_creds:"Nieprawidłowy e-mail lub hasło.", msg_generic_error:"Wystąpił błąd.", msg_need_email:"Podaj swój adres e-mail.",
-msg_sending:"Wysyłanie…", msg_reset_sent:"E-mail wysłany! Kliknij otrzymany link, aby wybrać nowe hasło.", msg_need_6chars:"Minimum 6 znaków.",
+msg_sending:"Wysyłanie…", msg_reset_sent:"E-mail wysłany! Kliknij otrzymany link, aby wybrać nowe hasło.", msg_need_6chars:"Minimum 8 znaków.",
 msg_updating:"Aktualizowanie…", msg_password_updated:"Hasło zaktualizowane!", msg_need_nom_prenom:"Podaj swoje imię i nazwisko.",
 admin_title:"Moje grupy", admin_create_t:"Utwórz grupę", admin_create_text:"Nadaj nazwę swojej grupie (klasa, rocznik…). Zostanie wygenerowany unikalny kod: udostępnij go osobom, które mają dołączyć.",
 ph_group_name:"Nazwa grupy", btn_create_group:"Utwórz grupę", admin_created_t:"Grupy, które utworzyłem(am)", btn_configure_display:"Skonfiguruj widoczność",
@@ -1992,15 +1999,15 @@ add_module_title:"Pridať vlastný modul (poznámky, karty…)", ph_module_title
 group_controlled_note:"Zobrazené moduly určuje tvoj učiteľ pre skupinu « {group} ». Pre akúkoľvek zmenu ho kontaktuj.", your_course_tag:" (tvoj kurz)",
 btn_delete:"Odstrániť",
 account_title:"Môj účet", tab_login:"Prihlásenie", tab_signup:"Vytvoriť účet",
-ph_prenom:"Meno", ph_nom:"Priezvisko", ph_group_code:"Kód triedy / skupiny (voliteľné)", ph_email:"E-mailová adresa", ph_password:"Heslo (min. 6 znakov)",
+ph_prenom:"Meno", ph_nom:"Priezvisko", ph_group_code:"Kód triedy / skupiny (voliteľné)", ph_email:"E-mailová adresa", ph_password:"Heslo (min. 8 znakov)",
 forgot_link:"Zabudol(a) si heslo?", btn_login:"Prihlásiť sa", btn_signup:"Vytvoriť účet",
 account_note:"Tvoj účet uchováva tvoj postup (splnené kapitoly, preferencie…) aj pri zmene zariadenia alebo prehliadača.",
 forgot_text:"Zadaj svoj e-mail: pošleme ti odkaz na výber nového hesla.", btn_send_reset:"Odoslať odkaz", btn_back_login:"← Späť na prihlásenie",
-reset_text:"Vyber si nové heslo pre svoj účet.", ph_new_password:"Nové heslo (min. 6 znakov)", btn_update_password:"Aktualizovať heslo",
+reset_text:"Vyber si nové heslo pre svoj účet.", ph_new_password:"Nové heslo (min. 8 znakov)", btn_update_password:"Aktualizovať heslo",
 msg_need_email_pw:"Zadaj e-mail a heslo.", msg_wait:"Chvíľku…", msg_created_connected:"Účet vytvorený, si prihlásený(á)!",
 msg_created_confirm_email:"Účet vytvorený! Skontroluj si e-mail na potvrdenie adresy a potom sa prihlás.", msg_connected:"Prihlásené!",
 msg_invalid_creds:"Nesprávny e-mail alebo heslo.", msg_generic_error:"Vyskytla sa chyba.", msg_need_email:"Zadaj svoju e-mailovú adresu.",
-msg_sending:"Odosielanie…", msg_reset_sent:"E-mail odoslaný! Klikni na prijatý odkaz a vyber si nové heslo.", msg_need_6chars:"Minimálne 6 znakov.",
+msg_sending:"Odosielanie…", msg_reset_sent:"E-mail odoslaný! Klikni na prijatý odkaz a vyber si nové heslo.", msg_need_6chars:"Minimálne 8 znakov.",
 msg_updating:"Aktualizácia…", msg_password_updated:"Heslo aktualizované!", msg_need_nom_prenom:"Zadaj svoje meno a priezvisko.",
 admin_title:"Moje skupiny", admin_create_t:"Vytvoriť skupinu", admin_create_text:"Daj svojej skupine názov (trieda, ročník…). Vygeneruje sa jedinečný kód: zdieľaj ho s ľuďmi, ktorí sa majú pripojiť.",
 ph_group_name:"Názov skupiny", btn_create_group:"Vytvoriť skupinu", admin_created_t:"Skupiny, ktoré som vytvoril(a)", btn_configure_display:"Nastaviť zobrazenie",
@@ -2076,15 +2083,15 @@ add_module_title:"Добави свободен модул (бележки, ли
 group_controlled_note:"Показаните модули се определят от твоя учител за групата « {group} ». Свържи се с него за всяка промяна.", your_course_tag:" (твоят курс)",
 btn_delete:"Изтрий",
 account_title:"Моят акаунт", tab_login:"Вход", tab_signup:"Регистрация",
-ph_prenom:"Име", ph_nom:"Фамилия", ph_group_code:"Код на клас / група (по избор)", ph_email:"Имейл адрес", ph_password:"Парола (мин. 6 символа)",
+ph_prenom:"Име", ph_nom:"Фамилия", ph_group_code:"Код на клас / група (по избор)", ph_email:"Имейл адрес", ph_password:"Парола (мин. 8 символа)",
 forgot_link:"Забравена парола?", btn_login:"Вход", btn_signup:"Регистрирай се",
 account_note:"Твоят акаунт пази прогреса ти (издържани глави, предпочитания…) дори при смяна на устройство или браузър.",
 forgot_text:"Посочи имейла си: ще ти изпратим линк за избор на нова парола.", btn_send_reset:"Изпрати линка", btn_back_login:"← Обратно към входа",
-reset_text:"Избери нова парола за акаунта си.", ph_new_password:"Нова парола (мин. 6 символа)", btn_update_password:"Актуализирай паролата",
+reset_text:"Избери нова парола за акаунта си.", ph_new_password:"Нова парола (мин. 8 символа)", btn_update_password:"Актуализирай паролата",
 msg_need_email_pw:"Посочи имейл и парола.", msg_wait:"Момент…", msg_created_connected:"Акаунтът е създаден, влязъл(а) си!",
 msg_created_confirm_email:"Акаунтът е създаден! Провери пощата си, за да потвърдиш адреса, после влез.", msg_connected:"Влязъл(а) си!",
 msg_invalid_creds:"Грешен имейл или парола.", msg_generic_error:"Възникна грешка.", msg_need_email:"Посочи имейл адреса си.",
-msg_sending:"Изпращане…", msg_reset_sent:"Имейлът е изпратен! Кликни линка, за да избереш нова парола.", msg_need_6chars:"Минимум 6 символа.",
+msg_sending:"Изпращане…", msg_reset_sent:"Имейлът е изпратен! Кликни линка, за да избереш нова парола.", msg_need_6chars:"Минимум 8 символа.",
 msg_updating:"Актуализиране…", msg_password_updated:"Паролата е актуализирана!", msg_need_nom_prenom:"Посочи името и фамилията си.",
 admin_title:"Моите групи", admin_create_t:"Създай група", admin_create_text:"Дай име на групата си (клас, випуск…). Генерира се уникален код: сподели го с хората, които трябва да се присъединят.",
 ph_group_name:"Име на групата", btn_create_group:"Създай групата", admin_created_t:"Групи, които съм създал(а)", btn_configure_display:"Настрой видимостта",
@@ -2160,15 +2167,15 @@ add_module_title:"Pridėti laisvą modulį (užrašai, lapeliai…)", ph_module_
 group_controlled_note:"Rodomus modulius nustato tavo mokytojas grupei « {group} ». Dėl bet kokio pakeitimo susisiek su juo.", your_course_tag:" (tavo kursas)",
 btn_delete:"Ištrinti",
 account_title:"Mano paskyra", tab_login:"Prisijungimas", tab_signup:"Susikurti paskyrą",
-ph_prenom:"Vardas", ph_nom:"Pavardė", ph_group_code:"Klasės / grupės kodas (nebūtina)", ph_email:"El. pašto adresas", ph_password:"Slaptažodis (min. 6 simboliai)",
+ph_prenom:"Vardas", ph_nom:"Pavardė", ph_group_code:"Klasės / grupės kodas (nebūtina)", ph_email:"El. pašto adresas", ph_password:"Slaptažodis (min. 8 simboliai)",
 forgot_link:"Pamiršai slaptažodį?", btn_login:"Prisijungti", btn_signup:"Sukurti paskyrą",
 account_note:"Tavo paskyra išsaugo tavo pažangą (išlaikytus skyrius, nuostatas…), net pakeitus įrenginį ar naršyklę.",
 forgot_text:"Nurodyk savo el. paštą: atsiųsime nuorodą naujam slaptažodžiui pasirinkti.", btn_send_reset:"Siųsti nuorodą", btn_back_login:"← Grįžti prie prisijungimo",
-reset_text:"Pasirink naują savo paskyros slaptažodį.", ph_new_password:"Naujas slaptažodis (min. 6 simboliai)", btn_update_password:"Atnaujinti slaptažodį",
+reset_text:"Pasirink naują savo paskyros slaptažodį.", ph_new_password:"Naujas slaptažodis (min. 8 simboliai)", btn_update_password:"Atnaujinti slaptažodį",
 msg_need_email_pw:"Nurodyk el. paštą ir slaptažodį.", msg_wait:"Akimirką…", msg_created_connected:"Paskyra sukurta, esi prisijungęs(-usi)!",
 msg_created_confirm_email:"Paskyra sukurta! Patikrink savo paštą, kad patvirtintum adresą, tada prisijunk.", msg_connected:"Prisijungta!",
 msg_invalid_creds:"Neteisingas el. paštas arba slaptažodis.", msg_generic_error:"Įvyko klaida.", msg_need_email:"Nurodyk savo el. pašto adresą.",
-msg_sending:"Siunčiama…", msg_reset_sent:"El. laiškas išsiųstas! Spustelėk gautą nuorodą, kad pasirinktum naują slaptažodį.", msg_need_6chars:"Mažiausiai 6 simboliai.",
+msg_sending:"Siunčiama…", msg_reset_sent:"El. laiškas išsiųstas! Spustelėk gautą nuorodą, kad pasirinktum naują slaptažodį.", msg_need_6chars:"Mažiausiai 8 simboliai.",
 msg_updating:"Atnaujinama…", msg_password_updated:"Slaptažodis atnaujintas!", msg_need_nom_prenom:"Nurodyk savo vardą ir pavardę.",
 admin_title:"Mano grupės", admin_create_t:"Sukurti grupę", admin_create_text:"Suteik savo grupei pavadinimą (klasė, laida…). Bus sugeneruotas unikalus kodas: pasidalink juo su tais, kurie turi prisijungti.",
 ph_group_name:"Grupės pavadinimas", btn_create_group:"Sukurti grupę", admin_created_t:"Mano sukurtos grupės", btn_configure_display:"Konfigūruoti matomumą",
@@ -2244,15 +2251,15 @@ add_module_title:"Προσθήκη ελεύθερης ενότητας (σημε
 group_controlled_note:"Οι εμφανιζόμενες ενότητες ορίζονται από τον καθηγητή σου για την ομάδα « {group} ». Επικοινώνησε μαζί του για οποιαδήποτε αλλαγή.", your_course_tag:" (το μάθημά σου)",
 btn_delete:"Διαγραφή",
 account_title:"Ο λογαριασμός μου", tab_login:"Σύνδεση", tab_signup:"Δημιουργία λογαριασμού",
-ph_prenom:"Όνομα", ph_nom:"Επώνυμο", ph_group_code:"Κωδικός τάξης / ομάδας (προαιρετικό)", ph_email:"Διεύθυνση email", ph_password:"Κωδικός πρόσβασης (ελάχ. 6 χαρακτήρες)",
+ph_prenom:"Όνομα", ph_nom:"Επώνυμο", ph_group_code:"Κωδικός τάξης / ομάδας (προαιρετικό)", ph_email:"Διεύθυνση email", ph_password:"Κωδικός πρόσβασης (ελάχ. 8 χαρακτήρες)",
 forgot_link:"Ξέχασες τον κωδικό σου;", btn_login:"Σύνδεση", btn_signup:"Δημιουργία λογαριασμού",
 account_note:"Ο λογαριασμός σου διατηρεί την πρόοδό σου (επιτυχημένα κεφάλαια, προτιμήσεις…) ακόμη κι αν αλλάξεις συσκευή ή πρόγραμμα περιήγησης.",
 forgot_text:"Δώσε το email σου: θα σου στείλουμε έναν σύνδεσμο για να επιλέξεις νέο κωδικό.", btn_send_reset:"Αποστολή συνδέσμου", btn_back_login:"← Επιστροφή στη σύνδεση",
-reset_text:"Επίλεξε νέο κωδικό πρόσβασης για τον λογαριασμό σου.", ph_new_password:"Νέος κωδικός (ελάχ. 6 χαρακτήρες)", btn_update_password:"Ενημέρωση κωδικού",
+reset_text:"Επίλεξε νέο κωδικό πρόσβασης για τον λογαριασμό σου.", ph_new_password:"Νέος κωδικός (ελάχ. 8 χαρακτήρες)", btn_update_password:"Ενημέρωση κωδικού",
 msg_need_email_pw:"Δώσε ένα email και έναν κωδικό.", msg_wait:"Μια στιγμή…", msg_created_connected:"Ο λογαριασμός δημιουργήθηκε, είσαι συνδεδεμένος(η)!",
 msg_created_confirm_email:"Ο λογαριασμός δημιουργήθηκε! Έλεγξε το email σου για να επιβεβαιώσεις τη διεύθυνσή σου, μετά συνδέσου.", msg_connected:"Συνδέθηκες!",
 msg_invalid_creds:"Λανθασμένο email ή κωδικός.", msg_generic_error:"Παρουσιάστηκε σφάλμα.", msg_need_email:"Δώσε τη διεύθυνση email σου.",
-msg_sending:"Αποστολή…", msg_reset_sent:"Το email στάλθηκε! Κάνε κλικ στον σύνδεσμο που έλαβες για να επιλέξεις νέο κωδικό.", msg_need_6chars:"Ελάχιστο 6 χαρακτήρες.",
+msg_sending:"Αποστολή…", msg_reset_sent:"Το email στάλθηκε! Κάνε κλικ στον σύνδεσμο που έλαβες για να επιλέξεις νέο κωδικό.", msg_need_6chars:"Ελάχιστο 8 χαρακτήρες.",
 msg_updating:"Ενημέρωση…", msg_password_updated:"Ο κωδικός ενημερώθηκε!", msg_need_nom_prenom:"Δώσε το όνομα και το επώνυμό σου.",
 admin_title:"Οι ομάδες μου", admin_create_t:"Δημιουργία ομάδας", admin_create_text:"Δώσε ένα όνομα στην ομάδα σου (τάξη, σειρά…). Δημιουργείται ένας μοναδικός κωδικός: μοιράσου τον με όσους πρέπει να συμμετάσχουν.",
 ph_group_name:"Όνομα ομάδας", btn_create_group:"Δημιουργία ομάδας", admin_created_t:"Ομάδες που έχω δημιουργήσει", btn_configure_display:"Ρύθμιση εμφάνισης",
@@ -2772,16 +2779,83 @@ async function loadState(){
 const SUPABASE_URL = 'https://hybnlwvrgcgwmpddnyye.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5Ym5sd3ZyZ2Nnd21wZGRueXllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwMTY5MTUsImV4cCI6MjEwNDU5MjkxNX0.3VwQdj6w4YIMb-phsiWSl6mvjOu28SdAS6U5eUrC8zg';
 
-// Session Supabase : même stockage universel (fonctionne aussi bien dans l'aperçu que sur le site déployé).
-const supabaseAuthStorage = {
-  async getItem(key){ return storageGet(key); },
-  async setItem(key, value){ return storageSet(key, value); },
-  async removeItem(key){ return storageDelete(key); }
-};
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { storage: supabaseAuthStorage, persistSession: true, autoRefreshToken: true }
-});
+// Authentification : Clerk. La base Supabase reçoit le jeton de session Clerk (intégration « Third-party auth »).
+async function vyseToken(){
+  try{ return (window.Clerk && window.Clerk.session) ? await window.Clerk.session.getToken() : null; }
+  catch(e){ console.error('Jeton Clerk indisponible :', e); return null; }
+}
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { accessToken: vyseToken });
 let currentSession = null;
+let clerkReadyPromise = null;
+function clerkReady(){
+  if(!clerkReadyPromise){
+    clerkReadyPromise = (async () => {
+      for(let i = 0; i < 100 && !window.Clerk; i++) await new Promise(r => setTimeout(r, 100));
+      if(!window.Clerk) throw new Error('Service de connexion indisponible. Recharge la page.');
+      if(!window.Clerk.loaded) await window.Clerk.load();
+      window.Clerk.addListener(({ user }) => {
+        if(!user && currentSession){ currentSession = null; renderAccountUI(); }
+      });
+      return window.Clerk;
+    })();
+    clerkReadyPromise.catch(() => { clerkReadyPromise = null; });
+  }
+  return clerkReadyPromise;
+}
+const PENDING_META_KEY = 'vyse-pending-meta';
+let profCodeRejected = false;
+// Compte Vyse (table app_users) correspondant à la session Clerk ; créé à la première connexion.
+async function buildSession(){
+  if(!(window.Clerk && window.Clerk.user && window.Clerk.session)) return null;
+  let pending = null;
+  try{ pending = JSON.parse((await storageGet(PENDING_META_KEY)) || 'null'); }catch(e){ pending = null; }
+  let res = await supabaseClient.rpc('ensure_my_account', { p_meta: pending || {} });
+  if(res.error && /PROF_CODE_INVALID/.test(res.error.message || '') && pending){
+    profCodeRejected = true;
+    res = await supabaseClient.rpc('ensure_my_account', { p_meta: { prenom: pending.prenom, nom: pending.nom } });
+  }
+  if(res.error) throw res.error;
+  if(pending){ try{ await storageDelete(PENDING_META_KEY); }catch(e){} }
+  const row = Array.isArray(res.data) ? res.data[0] : res.data;
+  if(!row) return null;
+  const cu = window.Clerk.user;
+  const mail = row.email || (cu.primaryEmailAddress ? cu.primaryEmailAddress.emailAddress : '') || '';
+  return { access_token: await vyseToken(), user: { id: row.id, email: mail, user_metadata: row.meta || {} } };
+}
+async function vyseOnSignedIn(){
+  try{ currentSession = await buildSession(); }
+  catch(e){ console.error('Compte Vyse introuvable :', e); currentSession = null; }
+  renderAccountUI();
+  if(currentSession && !inRecoveryFlow){
+    loadRemoteState(); consumePendingGroupJoin(); loadJoinedProfModules();
+    if(pendingModuleCode){ joinProfModuleByCode(pendingModuleCode); pendingModuleCode = null; }
+    enterApp();
+  }
+  return !!currentSession;
+}
+async function clerkSignOut(){
+  try{ const C = await clerkReady(); if(C.user) await C.signOut(); }catch(e){ console.error(e); }
+  currentSession = null;
+}
+async function clerkSignInWithTicket(ticket){
+  const C = await clerkReady();
+  if(C.user) await C.signOut();
+  const si = await C.client.signIn.create({ strategy: 'ticket', ticket });
+  if(si.status !== 'complete') throw new Error('ticket_incomplete');
+  await C.setActive({ session: si.createdSessionId });
+  return vyseOnSignedIn();
+}
+function clerkErrCode(e){ return (e && e.errors && e.errors[0] && e.errors[0].code) || ''; }
+function clerkErrText(e){
+  const c = clerkErrCode(e);
+  if(/form_password_incorrect|form_identifier_not_found|strategy_for_user_invalid|form_param_format_invalid/.test(c)) return t('msg_invalid_creds');
+  if(/form_password_pwned/.test(c)) return 'Ce mot de passe figure dans une fuite de données connue : choisis-en un autre.';
+  if(/form_password_length_too_short|form_password_validation_failed|form_password_not_strong_enough/.test(c)) return t('etab_err_weak');
+  if(/form_identifier_exists/.test(c)) return 'Un compte existe déjà avec cette adresse e-mail. Connecte-toi.';
+  if(/form_code_incorrect|verification_failed|verification_expired/.test(c)) return 'Code incorrect ou expiré.';
+  if(/too_many_requests|user_locked/.test(c)) return 'Trop de tentatives. Réessaie plus tard.';
+  return (e && e.errors && e.errors[0] && (e.errors[0].longMessage || e.errors[0].message)) || (e && e.message) || t('msg_generic_error');
+}
 let authMode = 'login';
 let profAuthMode = 'login';
 let isProf = false; // true si le compte connecté a le rôle professeur
@@ -2949,7 +3023,7 @@ async function etabRequestReset(){
 }
 async function etabCall(payload){
   try{
-    const r = await fetch(SUPABASE_URL + '/functions/v1/etab-login', {
+    const r = await fetch(SUPABASE_URL + '/functions/v1/clerk-etab', {
       method:'POST',
       headers:{ 'Content-Type':'application/json', 'apikey':SUPABASE_ANON_KEY, 'Authorization':'Bearer ' + SUPABASE_ANON_KEY },
       body: JSON.stringify(payload)
@@ -2983,10 +3057,7 @@ async function submitEtabAuth(){
   const res = await etabCall(payload);
   let ok = false;
   if(res.ok){
-    try{
-      const { error } = await supabaseClient.auth.setSession({ access_token:res.j.access_token, refresh_token:res.j.refresh_token });
-      if(error) throw error; ok = true;
-    }catch(err){ console.error(err); }
+    try{ ok = await clerkSignInWithTicket(res.j.ticket); }catch(err){ console.error(err); }
   }
   etabAuthBusy = false; document.getElementById('profAuthSubmitBtn').disabled = false;
   if(ok){ msg.style.color = 'var(--ok)'; msg.textContent = t('etab_ok'); setTimeout(closeProfModal, 600); return; }
@@ -3009,25 +3080,58 @@ async function submitProfAuth(){
       const profCode = document.getElementById('profCode').value.trim();
       if(!nom || !prenom || !profCode){ msg.style.color = 'var(--bad)'; msg.textContent = t('msg_need_prof_fields'); return; }
       if(!document.getElementById('profPrivacyConsent').checked){ msg.style.color = 'var(--bad)'; msg.textContent = t('msg_need_privacy_consent'); return; }
-      const { data, error } = await supabaseClient.auth.signUp({
-        email, password,
-        options: { data: { role: 'prof', nom, prenom, profCode, consentAt: new Date().toISOString() } }
-      });
-      if(error) throw error;
-      if(data.session){ msg.style.color = 'var(--ok)'; msg.textContent = t('msg_created_connected'); setTimeout(closeProfModal, 900); }
-      else { msg.style.color = 'var(--ok)'; msg.textContent = t('msg_created_confirm_email'); }
+      if(password.length < 8){ msg.style.color = 'var(--bad)'; msg.textContent = t('etab_err_weak'); return; }
+      const chk = await supabaseClient.rpc('check_prof_code', { p_code: profCode });
+      if(chk.error) throw chk.error;
+      if(chk.data !== true){ msg.style.color = 'var(--bad)'; msg.textContent = t('msg_prof_code_invalid'); return; }
+      const C = await clerkReady();
+      if(C.user) await C.signOut();
+      await storageSet(PENDING_META_KEY, JSON.stringify({ role: 'prof', nom, prenom, profCode, consentAt: new Date().toISOString() }));
+      const su = await C.client.signUp.create({ emailAddress: email, password, firstName: prenom, lastName: nom });
+      if(su.status === 'complete'){ await C.setActive({ session: su.createdSessionId }); await afterProfSignup(msg); return; }
+      await su.prepareEmailAddressVerification({ strategy: 'email_code' });
+      profPendingSignUp = su;
+      document.getElementById('profVerifyBox').style.display = 'block';
+      document.getElementById('profVerifyCode').value = '';
+      document.getElementById('profVerifyCode').focus();
+      msg.style.color = 'var(--ok)'; msg.textContent = t('msg_created_confirm_email');
     } else {
-      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if(error) throw error;
+      const C = await clerkReady();
+      if(C.user) await C.signOut();
+      const si = await C.client.signIn.create({ identifier: email, password });
+      if(si.status !== 'complete') throw new Error('Connexion incomplète (' + si.status + ').');
+      await C.setActive({ session: si.createdSessionId });
+      await vyseOnSignedIn();
       msg.style.color = 'var(--ok)'; msg.textContent = t('msg_connected'); setTimeout(closeProfModal, 700);
     }
   }catch(e){
+    console.error(e);
     msg.style.color = 'var(--bad)';
-    const em = String(e && e.message || '');
-    msg.textContent = em === 'Invalid login credentials' ? t('msg_invalid_creds')
-      : (/PROF_CODE_INVALID|Database error saving new user/i.test(em) && profAuthMode === 'signup') ? t('msg_prof_code_invalid')
-      : (em || t('msg_generic_error'));
+    msg.textContent = clerkErrText(e);
   }
+}
+let profPendingSignUp = null;
+async function afterProfSignup(msg){
+  profPendingSignUp = null;
+  document.getElementById('profVerifyBox').style.display = 'none';
+  profCodeRejected = false;
+  await vyseOnSignedIn();
+  if(profCodeRejected){ msg.style.color = 'var(--bad)'; msg.textContent = t('msg_prof_code_invalid'); profCodeRejected = false; return; }
+  msg.style.color = 'var(--ok)'; msg.textContent = t('msg_created_connected'); setTimeout(closeProfModal, 900);
+}
+async function submitProfVerify(){
+  const msg = document.getElementById('profAuthMsg');
+  const code = document.getElementById('profVerifyCode').value.trim();
+  if(!profPendingSignUp){ document.getElementById('profVerifyBox').style.display = 'none'; return; }
+  if(!code){ msg.style.color = 'var(--bad)'; msg.textContent = 'Saisis le code reçu par e-mail.'; return; }
+  msg.style.color = '#6b7280'; msg.textContent = t('msg_wait');
+  try{
+    const r = await profPendingSignUp.attemptEmailAddressVerification({ code });
+    if(r.status !== 'complete') throw new Error('Inscription incomplète (' + r.status + ').');
+    const C = await clerkReady();
+    await C.setActive({ session: r.createdSessionId });
+    await afterProfSignup(msg);
+  }catch(e){ console.error(e); msg.style.color = 'var(--bad)'; msg.textContent = clerkErrText(e); }
 }
 function openPresentation(){ const p = document.getElementById('presPage'); p.classList.add('active'); p.scrollTop = 0; document.body.style.overflow = 'hidden'; }
 function closePresentation(){ document.getElementById('presPage').classList.remove('active'); document.body.style.overflow = ''; }
@@ -3086,35 +3190,65 @@ async function submitForgotPassword(){
   if(!email){ msg.style.color = 'var(--bad)'; msg.textContent = t('msg_need_email'); return; }
   msg.style.color = '#6b7280'; msg.textContent = t('msg_sending');
   try{
-    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
-    if(error) throw error;
+    const C = await clerkReady();
+    if(C.user) await clerkSignOut();
+    resetSignIn = await C.client.signIn.create({ strategy: 'reset_password_email_code', identifier: email });
     msg.style.color = 'var(--ok)';
     msg.textContent = t('msg_reset_sent');
+    inRecoveryFlow = true; renderAccountUI();
+    showResetFields(true);
+    document.getElementById('resetMsg').style.color = 'var(--ok)';
+    document.getElementById('resetMsg').textContent = t('msg_reset_sent');
   }catch(e){
+    console.error(e);
     msg.style.color = 'var(--bad)';
-    msg.textContent = e.message || t('msg_generic_error');
+    msg.textContent = clerkErrCode(e) === 'form_identifier_not_found' ? t('msg_reset_sent') : clerkErrText(e);
   }
 }
-function showChangePassword(){ if(currentSession && isSeatUser(currentSession.user)) return; inRecoveryFlow = true; renderAccountUI(); document.getElementById('newPasswordField').value = ''; document.getElementById('resetMsg').textContent = ''; }
+let resetSignIn = null;
+function showResetFields(byCode){
+  document.getElementById('resetCodeField').style.display = byCode ? 'block' : 'none';
+  document.getElementById('currentPasswordField').style.display = byCode ? 'none' : 'block';
+  ['resetCodeField','currentPasswordField','newPasswordField'].forEach(id => { document.getElementById(id).value = ''; });
+}
+function cancelPasswordReset(){ resetSignIn = null; inRecoveryFlow = false; renderAccountUI(); }
+function showChangePassword(){ if(currentSession && isSeatUser(currentSession.user)) return; resetSignIn = null; inRecoveryFlow = true; renderAccountUI(); showResetFields(false); document.getElementById('resetMsg').textContent = ''; }
 async function submitNewPassword(){
   if(currentSession && isSeatUser(currentSession.user)){ inRecoveryFlow = false; renderAccountUI(); return; }
   const pass = document.getElementById('newPasswordField').value;
   const msg = document.getElementById('resetMsg');
-  if(!pass || pass.length < 6){ msg.style.color = 'var(--bad)'; msg.textContent = t('msg_need_6chars'); return; }
+  if(!pass || pass.length < 8){ msg.style.color = 'var(--bad)'; msg.textContent = t('msg_need_6chars'); return; }
   msg.style.color = '#6b7280'; msg.textContent = t('msg_updating');
   try{
-    const { error } = await supabaseClient.auth.updateUser({ password: pass });
-    if(error) throw error;
+    const C = await clerkReady();
+    if(resetSignIn){
+      const code = document.getElementById('resetCodeField').value.trim();
+      if(!code){ msg.style.color = 'var(--bad)'; msg.textContent = 'Saisis le code reçu par e-mail.'; return; }
+      const r = await resetSignIn.attemptFirstFactor({ strategy: 'reset_password_email_code', code, password: pass });
+      if(r.status !== 'complete') throw new Error('Réinitialisation incomplète (' + r.status + ').');
+      await C.setActive({ session: r.createdSessionId });
+      resetSignIn = null;
+      msg.style.color = 'var(--ok)'; msg.textContent = t('msg_password_updated');
+      inRecoveryFlow = false;
+      setTimeout(() => { closeAccount(); vyseOnSignedIn(); }, 800);
+      return;
+    }
+    if(!C.user) throw new Error(t('msg_generic_error'));
+    const current = document.getElementById('currentPasswordField').value;
+    if(!current){ msg.style.color = 'var(--bad)'; msg.textContent = 'Indique ton mot de passe actuel.'; return; }
+    await C.user.updatePassword({ currentPassword: current, newPassword: pass, signOutOfOtherSessions: true });
     msg.style.color = 'var(--ok)'; msg.textContent = t('msg_password_updated');
     setTimeout(() => { inRecoveryFlow = false; renderAccountUI(); closeAccount(); loadRemoteState(); }, 1000);
   }catch(e){
-    msg.style.color = 'var(--bad)'; msg.textContent = e.message || t('msg_generic_error');
+    console.error(e);
+    msg.style.color = 'var(--bad)'; msg.textContent = clerkErrText(e);
   }
 }
 async function logout(){
   const wasSeat = !!(currentSession && isSeatUser(currentSession.user));
   try{ await pushRemoteState(); }catch(e){}
-  await supabaseClient.auth.signOut();
+  await clerkSignOut();
+  renderAccountUI();
   closeAccount();
   if(wasSeat){ resetLocalProgress(); location.reload(); }
 }
@@ -3142,10 +3276,11 @@ async function deleteAccountNow(){
   btn.disabled = true;
   msg.style.color = '#6b7280'; msg.textContent = t('msg_deleting');
   try{
-    const { error } = await supabaseClient.functions.invoke('delete-account', { method: 'POST' });
+    const { error } = await supabaseClient.functions.invoke('clerk-account', { body: { action: 'delete_me' } });
     if(error) throw error;
     msg.style.color = 'var(--ok)'; msg.textContent = t('msg_account_deleted');
-    await supabaseClient.auth.signOut();
+    await clerkSignOut();
+    renderAccountUI();
     hiddenMatieres = []; hiddenModules = {}; customModules = {}; validatedChapters = {};
     await storageSet('hidden-matieres', '[]'); await storageSet('hidden-modules-v2', '{}');
     await storageSet('custom-modules-v2', '{}'); await storageSet('validated-chapters', '{}');
@@ -3558,7 +3693,7 @@ async function profMaybeResume(modules){
     if(now - new Date(c.updated_at).getTime() < 140000) continue;
     if(now - (profResumeAt[m.id] || 0) < 90000) continue;
     profResumeAt[m.id] = now;
-    const { error } = await supabaseClient.functions.invoke('generate-course', { body: { moduleId: m.id, resume: true } });
+    const { error } = await supabaseClient.functions.invoke('course-gen', { body: { moduleId: m.id, resume: true } });
     if(error){
       const info = await profInvokeError(error);
       if(info.status === 404){
@@ -3571,7 +3706,7 @@ async function profMaybeResume(modules){
 async function retryProfModule(id, isUpd){
   const fail = msg => isUpd ? { update_status: 'error', update_error: msg } : { status: 'error', error_message: msg };
   try{
-    const { error } = await supabaseClient.functions.invoke('generate-course', { body: { moduleId: id, retry: true } });
+    const { error } = await supabaseClient.functions.invoke('course-gen', { body: { moduleId: id, retry: true } });
     if(error){
       const info = await profInvokeError(error);
       if(info.status === 404){
@@ -3796,7 +3931,7 @@ async function launchCourseGeneration(moduleId, profFiles, stuFiles, illusMeta, 
       if(tx.length >= 80) studentTexts.push(tx.slice(0, 30000)); else console.warn('Notes d\'étudiant ignorées (illisibles) :', f.name);
     }
     if(!isUpdate) await supabaseClient.from('prof_module_content').upsert({ module_id: moduleId, status: 'pending', source_char_count: rawText.length });
-    const { error } = await supabaseClient.functions.invoke('generate-course', { body: { moduleId, rawText, studentTexts, illustrations: illusMeta || [] } });
+    const { error } = await supabaseClient.functions.invoke('course-gen', { body: { moduleId, rawText, studentTexts, illustrations: illusMeta || [] } });
     if(error){ const info = await profInvokeError(error); throw new Error(info.msg); }
     scheduleProfModulesPoll();
   }catch(e){
@@ -4315,7 +4450,7 @@ function fmtSeatCode(c){ c = String(c || ''); return c.length === 8 ? c.slice(0,
 
 async function studentCall(payload){
   try{
-    const r = await fetch(SUPABASE_URL + '/functions/v1/student-login', {
+    const r = await fetch(SUPABASE_URL + '/functions/v1/clerk-student', {
       method:'POST',
       headers:{ 'Content-Type':'application/json', 'apikey':SUPABASE_ANON_KEY, 'Authorization':'Bearer ' + SUPABASE_ANON_KEY },
       body: JSON.stringify(payload)
@@ -4412,10 +4547,7 @@ async function submitStuFlow(){
   const res = await studentCall(payload);
   let ok = false;
   if(res.ok){
-    try{
-      const { error } = await supabaseClient.auth.setSession({ access_token:res.j.access_token, refresh_token:res.j.refresh_token });
-      if(error) throw error; ok = true;
-    }catch(e){ console.error(e); }
+    try{ ok = await clerkSignInWithTicket(res.j.ticket); }catch(e){ console.error(e); }
   }
   studentLoginBusy = false; document.getElementById('stuSubmit').disabled = false;
   if(ok){ msg.style.color = 'var(--ok)'; msg.textContent = t('stu_welcome'); setTimeout(closeStuFlow, 500); return; }
@@ -5158,9 +5290,10 @@ async function admResetPw(uid, reqId){
   if(!confirm(t('adm_reset_confirm'))) return;
   const msg = document.getElementById('admMsg');
   try{
-    const r = await fetch(SUPABASE_URL + '/functions/v1/etab-login', {
+    const tok = await vyseToken();
+    const r = await fetch(SUPABASE_URL + '/functions/v1/clerk-etab', {
       method:'POST',
-      headers:{ 'Content-Type':'application/json', 'apikey':SUPABASE_ANON_KEY, 'Authorization':'Bearer ' + (currentSession ? currentSession.access_token : SUPABASE_ANON_KEY) },
+      headers:{ 'Content-Type':'application/json', 'apikey':SUPABASE_ANON_KEY, 'Authorization':'Bearer ' + (tok || SUPABASE_ANON_KEY) },
       body: JSON.stringify({ action:'admin_reset', user_id: uid })
     });
     const j = await r.json().catch(() => ({}));
@@ -6127,7 +6260,7 @@ async function consumePendingGroupJoin(){
     }
   }catch(e){ console.error('Adhésion auto au groupe impossible :', e); }
   finally{
-    try{ await supabaseClient.auth.updateUser({ data: { pendingGroupCode: null } }); }catch(e){}
+    try{ await supabaseClient.rpc('update_my_meta', { p_patch: { pendingGroupCode: null } }); }catch(e){}
     await loadGroupOverride();
   }
 }
@@ -6300,20 +6433,6 @@ async function renderStudentProgress(studentId){
   }
 }
 
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  currentSession = session;
-  if(event === 'PASSWORD_RECOVERY'){
-    inRecoveryFlow = true;
-    enterApp();
-    document.getElementById('accountOverlay').classList.add('active');
-  }
-  renderAccountUI();
-  if(event === 'SIGNED_IN' && !inRecoveryFlow){
-    loadRemoteState(); consumePendingGroupJoin(); loadJoinedProfModules();
-    if(pendingModuleCode){ joinProfModuleByCode(pendingModuleCode); pendingModuleCode = null; }
-    enterApp();
-  }
-});
 
 async function save(key, val){ await storageSet(key, typeof val==='string'?val:JSON.stringify(val)); scheduleRemoteSave(); }
 
@@ -7297,8 +7416,8 @@ async function addCustomModule(){
   // cliqué sur "Se connecter" / "Accéder à l'exemple", ou qu'une session
   // existe déjà (retour d'un utilisateur connecté).
   try{
-    const { data } = await supabaseClient.auth.getSession();
-    currentSession = data.session;
+    try{ await clerkReady(); currentSession = await buildSession(); }
+    catch(e){ console.error('Connexion Clerk :', e); currentSession = null; }
     if(RECOVERY_URL && currentSession) inRecoveryFlow = true;
     renderAccountUI();
     if(inRecoveryFlow){

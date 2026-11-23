@@ -3683,11 +3683,26 @@ function rebuildFictionalMatiereData(){
 const MATIERE_DATA = {};
 MATIERES.forEach(m => MATIERE_DATA[m.id] = MANUAL_MATIERE_DATA[m.id] || buildMatiereData(m));
 
+// QCM : l'IA rend souvent la bonne réponse plus longue que les autres. Au tirage, on favorise les questions
+// où elle ne se distingue pas, pour que « la plus longue » ne soit la bonne qu'environ une fois sur quatre.
+function qcmLenBias(it){
+  const L = (it && Array.isArray(it.opts) ? it.opts : []).map(o => String(o || '').trim().length);
+  if(L.length < 2 || !Number.isInteger(it.correct) || L[it.correct] == null) return 0;
+  const other = Math.max(...L.filter((_, k) => k !== it.correct));
+  return other > 0 ? L[it.correct] / other : 0;
+}
+function pickBalancedQcm(bank, n){
+  const items = (bank || []).slice();
+  n = Math.min(n, items.length);
+  const fair = shuffleArr(items.filter(it => qcmLenBias(it) <= 1));
+  const longest = shuffleArr(items.filter(it => qcmLenBias(it) > 1)).sort((a, b) => qcmLenBias(a) - qcmLenBias(b));
+  const wantLongest = Math.min(longest.length, Math.max(n - fair.length, Math.round(n * 0.25)));
+  return shuffleArr(fair.slice(0, n - wantLongest).concat(longest.slice(0, wantLongest)));
+}
 function buildGrandQcm(matId){
   const d = MATIERE_DATA[matId];
   const pool = d.chapters.flatMap(c => c.qcm).concat(d.extra);
-  const shuffled = pool.slice().sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, 100);
+  return pickBalancedQcm(pool, 100);
 }
 
 function toolModules(){
@@ -5359,6 +5374,12 @@ async function sendCourseChat(){
 const ED_MIN_QCM = 5;
 let profEd = null; // { moduleId, title, color, data:{chapters:[], extra:[]}, dirty:false }
 
+// Titres de chapitres : jamais de préfixe « Chapitre 3 - », « Chapter 2: », « Partie II – »… seulement le titre.
+const CHAP_PREFIX_RE = /^\s*(?:chapitre|chapter|chap\.?|cap[ií]tulo|capitolo|kapitel|partie|part)\s*(?:n[°o]\.?\s*)?(?:\d+|[IVXLC]+(?=\s*(?:\(|[-–—:.|]|$)))\s*(?:\([^)]*\))?\s*(?:[-–—:.|]\s*)?/i;
+function cleanChapterTitle(t){
+  const s = String(t == null ? '' : t);
+  return s.replace(CHAP_PREFIX_RE, '').trim() || s.trim();
+}
 function cleanGenerated(v, key){
   // Les textes des cours sont affichés comme du HTML à certains endroits : on neutralise toute balise.
   // Seule exception : les schémas SVG créés par l'IA (clé « svg »), affichés uniquement dans une balise <img> après contrôle (svgSafe).
@@ -5373,7 +5394,7 @@ function edNormalize(content){
   const c = content || {};
   const chapters = (c.chapters || []).map((ch, ci) => {
     const r = ch.resume || {};
-    const title = edStr(ch.title);
+    const title = cleanChapterTitle(edStr(ch.title));
     return {
       uid: 'u' + ci,
       genIllus: (Array.isArray(ch.illustrations) ? ch.illustrations : []).filter(x => x && svgSafe(x.svg)).map(x => ({ svg: x.svg, caption: edStr(x.caption) })),
@@ -5692,7 +5713,7 @@ async function openProfModuleManage(moduleId){
           ${chapters.map(ch => {
             const checked = !Array.isArray(currentVisible) || currentVisible.includes(ch.id);
             return `<label class="manage-row" style="cursor:pointer;">
-              <span><input type="checkbox" data-chapter-id="${ch.id}" ${checked ? 'checked' : ''}> ${escapeHtml(ch.title)}</span>
+              <span><input type="checkbox" data-chapter-id="${ch.id}" ${checked ? 'checked' : ''}> ${escapeHtml(cleanChapterTitle(ch.title))}</span>
             </label>`;
           }).join('')}
         </div>
@@ -7812,6 +7833,7 @@ function goGeneral(){ stopChapterTimer(); ttsStop(); currentMatiereId = null; re
 let profModuleWaitTimer = null;
 function buildMatiereDataFromGenerated(raw, visibleChapterIds){
   raw = cleanGenerated(raw);
+  (raw.chapters || []).forEach(ch => { if(ch && typeof ch.title === 'string') ch.title = cleanChapterTitle(ch.title); });
   const allChapters = raw.chapters || [];
   const kept = Array.isArray(visibleChapterIds) && visibleChapterIds.length
     ? allChapters.filter(ch => visibleChapterIds.includes(ch.id))
@@ -7821,7 +7843,7 @@ function buildMatiereDataFromGenerated(raw, visibleChapterIds){
     const bank = ch.qcmBank && ch.qcmBank.length ? ch.qcmBank : (ch.qcm || []);
     return {
       id: ch.id, num: i + 1, title: ch.title, resume: ch.resume,
-      qcm: shuffleArr(bank).slice(0, Math.min(30, bank.length)),
+      qcm: pickBalancedQcm(bank, 30),
       qcmBank: bank,
       lexique: ch.lexique || [],
       truefalse: ch.truefalse || [],

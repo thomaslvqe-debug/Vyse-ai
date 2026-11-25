@@ -26,7 +26,8 @@ Le premier lancement télécharge les poids depuis Hugging Face (~45 s de charge
 |---|---|
 | `generer_voix.py` | Génère une liste de phrases à partir d'un JSON de jobs |
 | `verifier_voix.py` | Retranscrit les WAV avec Whisper (small, CPU) pour vérifier la prononciation |
-| `voix_reference.wav` | Clip de 8 s qui fixe le timbre (voix masculine « étudiant ») ; à réutiliser pour garder la même voix d'un Reel à l'autre |
+| `voix_reference.wav` | Clip de 8 s qui fixe le timbre (voix masculine « étudiant ») ; à réutiliser pour garder la même voix d'un Reel à l'autre. Sert aussi pour Léo et le narrateur de la série « Léo & Inès » |
+| `voix_reference_ines.wav` | Timbre féminin (Inès, Mme Ravel) pour la série « Léo & Inès », ajouté le 25/11 |
 
 Format des jobs (`jobs.json`) :
 ```json
@@ -52,14 +53,18 @@ Format des jobs (`jobs.json`) :
 ## Règles de prononciation (Thomas y tient)
 
 1. **Toujours générer 2 prises par phrase**, puis les retranscrire avec `verifier_voix.py` et garder celle dont le texte revient exact. Rien ne part sans cette vérification.
-2. **« Vyse » n'est jamais prononcé** : la bonne prononciation n'est pas fixée. Le nom apparaît seulement à l'écran.
+2. **« Vyse » se prononce « vaïze »** (décision de Thomas, 25/11/2026) : écrire **« Vaïse »** dans le texte envoyé au modèle, vérifié à la retranscription. Le nom reste écrit « Vyse » à l'écran et dans les sous-titres.
 3. **« appli » → écrire « application »** (sinon entendu « appui »).
 4. **« QCM » → écrire « Q.C.M. »** dans le texte envoyé au modèle.
 5. **Pas d'anglicismes à l'oral** : « Storytime » est dit « Petite histoire » (le mot anglais reste à l'écran).
 6. **Pas de phrases trop courtes isolées** (« page blanche. » seul est inaudible) : les regrouper avec la phrase voisine, puis couper le WAV au besoin en s'aidant des horodatages mot à mot de Whisper.
 7. Après le mix complet, retranscrire le WAV final une dernière fois pour vérifier qu'aucune phrase n'a sauté.
 
+8. **Autres écritures validées à la retranscription** : « L1 » → « elle un », « J-1 » → « jé moins un », « jour J » → « jour ji ». Si « Q.C.M. » échoue deux fois, « ku-cé-èm » passe.
+9. Les nombres écrits en lettres reviennent en chiffres à la retranscription (« quatorze » → « 14 ») : convertir avant de comparer, sinon on régénère pour rien.
+
 ## Limites
 
 - Whisper peut mal retranscrire un mot bien prononcé (« les fait » lu « l'est fait ») : en cas de doute, comparer avec la prise isolée et signaler le mot à Thomas plutôt que de régénérer sans fin.
+- Mémoire : Chatterbox + Whisper dépassent ~6 Go s'ils restent chargés sur plusieurs Reels. Lancer **un processus par Reel**.
 - L'agent ne peut pas écouter : toujours demander à Thomas d'écouter avant publication, et lui envoyer les extraits avant/après quand on change de voix.

@@ -1790,6 +1790,7 @@
       <h1 class="pres-rise d1">La révision assistée par IA, <span>dans le cadre</span> fixé par l'enseignant.</h1>
       <p class="pres-rise d2">Vyse AI transforme les cours que les enseignants déposent en fiches, QCM et assistant de révision pour leurs étudiants, avec des accès gérés par l'établissement.</p>
       <div class="pres-cta pres-rise d3">
+        <button class="gbtn y lg pwa-big" style="display:none; width:100%; justify-content:center; font-size:1.1rem; padding:16px 22px;" onclick="pwaInstall()" data-i18n="pwa_dl">⬇ Télécharger l'application</button>
         <button class="gbtn y lg" onclick="goLogin()">Se connecter <span class="ar">→</span></button>
         <button class="gbtn lg" onclick="presContact()">Demander un échange</button>
       </div>
@@ -1920,6 +1921,7 @@
     <div class="landing-tagline" data-i18n="landing_tagline">Révisez. Progressez. Réussissez.</div>
 
     <div class="landing-actions">
+      <button class="gbtn y lg pwa-big" style="display:none; width:100%; margin-bottom:14px; justify-content:center; font-size:1.1rem; padding:16px 22px;" onclick="pwaInstall()" data-i18n="pwa_dl">⬇ Télécharger l'application</button>
       <div class="lg-k" data-i18n="stu_k">Étudiant</div>
       <form class="stu-login" onsubmit="event.preventDefault(); studentEmailLogin('landing');">
         <input type="email" id="lgStuEmail" class="stu-in" autocomplete="email" data-i18n-ph="ph_email" placeholder="Adresse e-mail" required>
@@ -2139,6 +2141,18 @@
 </div>
 
 <!-- Modale : choix de la langue (toute première visite) -->
+<div class="overlay" id="installOverlay" style="z-index:100000;">
+  <div class="modal-box" style="text-align:center; max-width:420px;">
+    <button class="close-x" onclick="closeInstallPopup()">×</button>
+    <img src="/icons/icon-192.png" alt="" style="width:88px; height:88px; border-radius:20px; box-shadow:0 10px 28px rgba(0,0,0,.18);">
+    <h3 style="margin:14px 0 6px;" data-i18n="pwa_pop_title">Installe Vyse sur ton appareil</h3>
+    <p style="font-size:.9rem; margin:0 0 16px;" data-i18n="pwa_pop_text">Ouverture en un tap, plein écran, et ta progression toujours à portée de main.</p>
+    <button class="gbtn y lg pwa-big" style="display:none; width:100%; justify-content:center; font-size:1.1rem; padding:16px 22px;" onclick="pwaInstall()" data-i18n="pwa_dl">⬇ Télécharger l’application</button>
+    <p style="font-size:.88rem; margin:10px 0 0; display:none;" id="pwaPopIos" data-i18n="pwa_ios">Sur iPhone/iPad : touche Partager, puis « Sur l’écran d’accueil ».</p>
+    <button class="btn ghost" style="margin-top:12px;" onclick="closeInstallPopup(true)" data-i18n="pwa_later">Plus tard</button>
+  </div>
+</div>
+
 <div class="overlay" id="langChoiceOverlay">
   <div class="modal-box">
     <h3 data-i18n="lang_choice_title">Choisis ta langue</h3>
@@ -2430,23 +2444,48 @@
 /* ===== PWA : installation, mémoire persistante, hors ligne ===== */
 let _deferredInstall = null;
 function pwaIsStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+function pwaIsIos(){ return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream; }
+function pwaCanInstall(){ return !pwaIsStandalone() && (!!_deferredInstall || pwaIsIos()); }
 function pwaRefreshUi(){
-  const b=document.getElementById('pwaInstallBtn'); if(!b) return;
-  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-  const installed=pwaIsStandalone();
-  b.style.display = (!installed && _deferredInstall) ? 'inline-block' : 'none';
-  document.getElementById('pwaIosHint').style.display = (!installed && ios && !_deferredInstall) ? 'block' : 'none';
-  document.getElementById('pwaDone').style.display = installed ? 'block' : 'none';
-  document.getElementById('pwaText').style.display = installed ? 'none' : 'block';
+  const installed=pwaIsStandalone(), ios=pwaIsIos(), can=pwaCanInstall();
+  document.querySelectorAll('.pwa-big').forEach(el=>{ el.style.display = (can && (_deferredInstall || !el.closest('#installOverlay'))) ? 'flex' : 'none'; });
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.style.display=v; };
+  const b=document.getElementById('pwaInstallBtn');
+  if(b) b.style.display = (!installed && _deferredInstall) ? 'inline-block' : 'none';
+  set('pwaIosHint', (!installed && ios && !_deferredInstall) ? 'block' : 'none');
+  set('pwaPopIos', (!installed && ios && !_deferredInstall) ? 'block' : 'none');
+  set('pwaDone', installed ? 'block' : 'none');
+  set('pwaText', installed ? 'none' : 'block');
   const m=document.getElementById('pwaMem'); if(m) m.textContent = (typeof t==='function'?t(window._vysePersisted ? 'pwa_mem_ok' : 'pwa_mem_std'):'');
 }
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); _deferredInstall = e; pwaRefreshUi(); });
+function closeInstallPopup(later){
+  const o=document.getElementById('installOverlay'); if(o) o.classList.remove('active');
+  if(later){ try{ localStorage.setItem('vyse-install-later', String(Date.now())); }catch(e){} }
+}
+function pwaMaybePopup(){
+  if(!window._pwaPopupWanted || !pwaCanInstall()) return;
+  try{
+    if(sessionStorage.getItem('vyse-install-popup')) return;
+    const l=+localStorage.getItem('vyse-install-later')||0;
+    if(Date.now()-l < 7*86400000) return;
+    sessionStorage.setItem('vyse-install-popup','1');
+  }catch(e){}
+  window._pwaPopupWanted=false;
+  const o=document.getElementById('installOverlay'); if(!o) return;
+  pwaRefreshUi(); try{ applyI18n(); }catch(e){}
+  o.classList.add('active');
+}
+document.addEventListener('DOMContentLoaded', () => { pwaRefreshUi(); pwaMaybePopup(); });
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); _deferredInstall = e; pwaRefreshUi(); pwaMaybePopup(); });
 window.addEventListener('appinstalled', () => { _deferredInstall = null; pwaRefreshUi(); });
 async function pwaInstall(){
-  if(!_deferredInstall) return;
+  if(!_deferredInstall){
+    if(pwaIsIos()){ const o=document.getElementById('installOverlay'); if(o){ pwaRefreshUi(); o.classList.add('active'); } }
+    return;
+  }
   _deferredInstall.prompt();
   try{ await _deferredInstall.userChoice; }catch(e){}
-  _deferredInstall = null; pwaRefreshUi();
+  _deferredInstall = null; pwaRefreshUi(); closeInstallPopup();
 }
 function pwaToast(msg, action){
   let el=document.getElementById('pwaToast');
@@ -2512,6 +2551,7 @@ let currentLang = 'fr';
 
 const I18N = {
 fr:{
+pwa_dl:"⬇ Télécharger l\u2019application", pwa_pop_title:"Installe Vyse sur ton appareil", pwa_pop_text:"Ouverture en un tap, plein écran, et ta progression toujours à portée de main.", pwa_later:"Plus tard",
 pwa_title:"Application", pwa_text:"Installe Vyse sur ton écran d\u2019accueil : ouverture en un tap, plein écran, et ta progression reste enregistrée.", pwa_install:"Installer Vyse", pwa_ios:"Sur iPhone/iPad : touche le bouton Partager, puis « Sur l\u2019écran d\u2019accueil ».", pwa_done:"✓ Vyse est installée sur cet appareil.", pwa_mem_ok:"Mémoire protégée : ta progression et tes réglages sont conservés sur cet appareil et synchronisés avec ton compte.", pwa_mem_std:"Ta progression est enregistrée sur cet appareil et synchronisée avec ton compte.", pwa_offline:"Hors ligne : tu peux relire l\u2019application, la synchronisation reprendra à la reconnexion.", pwa_update:"Nouvelle version disponible — recharger", 
 cls_seats_left:"Places restantes : {n}", cls_rotation_tip:"Nouvelle année : supprime le groupe de l\u2019an passé pour libérer ses places, puis crée le nouveau groupe et donne son code aux nouveaux étudiants.", 
 plan_pilote:"Pilote", plan_essentiel:"Essentiel", plan_etablissement:"Établissement", plan_sur_mesure:"Sur mesure", plan_none:"Sans abonnement (sans limite)", plan_opt_pilote:"Pilote — 1 professeur, 35 étudiants", plan_opt_essentiel:"Essentiel — 5 professeurs, 300 étudiants", plan_opt_etablissement:"Établissement — 15 professeurs, 800 étudiants", plan_opt_sur_mesure:"Sur mesure (limites à saisir)", adm_plan_lbl:"Abonnement :", adm_max_profs:"Profs max", adm_max_students:"Étudiants max", adm_col_plan:"Abonnement / accès", adm_usage:"{p} profs · {s} étudiants", adm_via_etab:"Rattaché à {name}", adm_independent:"Professeur indépendant", adm_suspended:"Accès coupé", adm_etab_suspended:"Établissement coupé", adm_suspend:"Couper l\u2019accès", adm_unsuspend:"Rétablir l\u2019accès", adm_suspend_confirm_etab:"Couper l\u2019accès de cet établissement ? Ses professeurs et ses étudiants ne pourront plus utiliser Vyse (sauf les étudiants inscrits aussi dans un autre établissement actif). Les données sont conservées et l\u2019accès peut être rétabli.", adm_suspend_confirm_prof:"Couper l\u2019accès de ce professeur ? Ses étudiants perdront l\u2019accès à ses cours. Les données sont conservées.", adm_suspended_done:"Accès coupé : {name}.", adm_unsuspended_done:"Accès rétabli : {name}.", adm_edit_plan:"Abonnement", adm_plan_edit_t:"Abonnement de {name}", adm_save:"Enregistrer", adm_cancel:"Annuler", adm_plan_saved:"Abonnement mis à jour.", adm_err_limits:"Indique un nombre de professeurs et d\u2019étudiants (1 minimum).", ep_title:"Professeurs", ep_plan:"Abonnement :", ep_profs_usage:"Professeurs : {n}", ep_students_usage:"Étudiants : {n}", ep_intro:"Crée un code par professeur : il le saisit en créant son compte dans l\u2019espace professeur et il est rattaché à l\u2019établissement, dans la limite de votre abonnement.", ep_label_ph:"Nom du professeur (facultatif)", ep_create:"Créer des codes professeur", ep_created:"{n} code(s) créé(s). Transmets-les aux professeurs :", ep_limit_reached:"Limite de professeurs de votre abonnement atteinte. Révoque un code non utilisé ou contacte Vyse AI pour changer d\u2019abonnement.", ep_err_prof_limit:"Cet établissement a atteint son nombre maximum de professeurs.", ep_col_prof:"Professeur", ep_removed:"Accès retiré", ep_active:"Actif", ep_waiting:"Code non utilisé", ep_unused:"Code non attribué", ep_n_modules:"{n} cours", ep_remove:"Retirer l\u2019accès", ep_restore:"Rétablir", ep_revoke:"Révoquer", ep_none:"Aucun code professeur pour le moment.", ep_remove_confirm:"Retirer l\u2019accès de ce professeur ? Ses étudiants perdront l\u2019accès à ses cours. Ses cours sont conservés.", ck_err_suspended:"L\u2019accès de ton établissement est suspendu. Contacte ton établissement.", 
@@ -2604,6 +2644,7 @@ tt_dashboard:"Tableau de bord", dashboard_title:"Mon tableau de bord", dashboard
 subj_math_name:"Mathématiques", subj_math_desc:"Algèbre, géométrie, fonctions…", subj_hist_name:"Histoire-Géographie", subj_hist_desc:"Grandes périodes et repères", subj_svt_name:"SVT", subj_svt_desc:"Sciences de la vie et de la Terre", subj_phys_name:"Physique-Chimie", subj_phys_desc:"Lois, réactions, mesures", subj_ang_name:"Anglais", subj_ang_desc:"Vocabulaire, grammaire, culture", ph_resume_intro:"Résumé à compléter pour le chapitre {n} de {mat}.", ph_point_cle:"Point clé {p} du chapitre {n} — à préciser", ph_retenir:"À retenir : la synthèse en une phrase du chapitre {n} viendra ici.", ph_lex_term:"Terme {i} (chap. {n})", ph_lex_def:"Définition à compléter pour ce terme du chapitre {n}.", ph_ex_titre:"Exemple {i} — chapitre {n}", ph_ex_texte:"Exemple concret à rédiger pour une notion du chapitre {n}.", ph_exo_enonce:"Exercice {i} du chapitre {n} — énoncé à compléter.", ph_exo_correction:"Corrigé à compléter pour l'exercice {i}.", ph_question_wrap:"{prefix} — Question {i}. {q}", q_tpl1:"Que signifie principalement l'élément n°{i} du cours ?", q_tpl2:"Quel est le point à retenir associé à la notion n°{i} ?", q_tpl3:"Comment définirais-tu correctement le concept n°{i} ?", q_tpl4:"Quelle affirmation correspond à l'idée n°{i} du cours ?", ph_correct_opt:"Réponse correcte à préciser (item {i})", ph_distractor:"Distracteur {k} à préciser (item {i})", ph_tf_stmt:"{prefix} : affirmation n°{i} à vérifier — à remplacer par une vraie affirmation du cours.", question_transversale:"Question transversale"
 },
 en:{
+pwa_dl:"⬇ Download the app", pwa_pop_title:"Install Vyse on your device", pwa_pop_text:"One-tap launch, full screen, and your progress always at hand.", pwa_later:"Later",
 pwa_title:"App", pwa_text:"Install Vyse on your home screen: one-tap launch, full screen, and your progress stays saved.", pwa_install:"Install Vyse", pwa_ios:"On iPhone/iPad: tap Share, then \u201cAdd to Home Screen\u201d.", pwa_done:"✓ Vyse is installed on this device.", pwa_mem_ok:"Protected storage: your progress and settings are kept on this device and synced with your account.", pwa_mem_std:"Your progress is saved on this device and synced with your account.", pwa_offline:"Offline: you can reopen the app; syncing resumes when you reconnect.", pwa_update:"New version available — reload", 
 cls_seats_left:"Places left: {n}", cls_rotation_tip:"New year: delete last year\u2019s group to free its places, then create the new group and give its code to the new students.", 
 plan_pilote:"Pilot", plan_essentiel:"Essential", plan_etablissement:"Institution", plan_sur_mesure:"Custom", plan_none:"No plan (no limit)", plan_opt_pilote:"Pilot — 1 teacher, 35 students", plan_opt_essentiel:"Essential — 5 teachers, 300 students", plan_opt_etablissement:"Institution — 15 teachers, 800 students", plan_opt_sur_mesure:"Custom (enter limits)", adm_plan_lbl:"Plan:", adm_max_profs:"Max teachers", adm_max_students:"Max students", adm_col_plan:"Plan / access", adm_usage:"{p} teachers · {s} students", adm_via_etab:"Linked to {name}", adm_independent:"Independent teacher", adm_suspended:"Access cut", adm_etab_suspended:"Institution cut", adm_suspend:"Cut access", adm_unsuspend:"Restore access", adm_suspend_confirm_etab:"Cut this institution\u2019s access? Its teachers and students will no longer be able to use Vyse (except students also enrolled in another active institution). Data is kept and access can be restored.", adm_suspend_confirm_prof:"Cut this teacher\u2019s access? Their students will lose access to their courses. Data is kept.", adm_suspended_done:"Access cut: {name}.", adm_unsuspended_done:"Access restored: {name}.", adm_edit_plan:"Plan", adm_plan_edit_t:"Plan for {name}", adm_save:"Save", adm_cancel:"Cancel", adm_plan_saved:"Plan updated.", adm_err_limits:"Enter a number of teachers and students (1 minimum).", ep_title:"Teachers", ep_plan:"Plan:", ep_profs_usage:"Teachers: {n}", ep_students_usage:"Students: {n}", ep_intro:"Create one code per teacher: they enter it when creating their account in the teacher area and are linked to the institution, within your plan\u2019s limit.", ep_label_ph:"Teacher name (optional)", ep_create:"Create teacher codes", ep_created:"{n} code(s) created. Send them to the teachers:", ep_limit_reached:"Your plan\u2019s teacher limit is reached. Revoke an unused code or contact Vyse AI to change plan.", ep_err_prof_limit:"This institution has reached its maximum number of teachers.", ep_col_prof:"Teacher", ep_removed:"Access removed", ep_active:"Active", ep_waiting:"Unused code", ep_unused:"Unassigned code", ep_n_modules:"{n} course(s)", ep_remove:"Remove access", ep_restore:"Restore", ep_revoke:"Revoke", ep_none:"No teacher code yet.", ep_remove_confirm:"Remove this teacher\u2019s access? Their students will lose access to their courses. Their courses are kept.", ck_err_suspended:"Your institution\u2019s access is suspended. Contact your institution.", 
@@ -7662,6 +7703,7 @@ vyseAuth.onAuthStateChange((event, session) => {
     loadRemoteState(); consumePendingGroupJoin(); loadJoinedProfModules(); consumePendingClassJoin();
     if(pendingModuleCode){ joinProfModuleByCode(pendingModuleCode); pendingModuleCode = null; }
     enterApp();
+    window._pwaPopupWanted = true; try{ pwaMaybePopup(); }catch(e){}
   }
 });
 
